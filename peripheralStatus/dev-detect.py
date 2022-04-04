@@ -5,7 +5,6 @@ import smbus2
 import serial
 import sys
 import json
-import cv2
 
 def find_hts221():
     # Write data to address x5F(95), and register x20(32)
@@ -49,10 +48,10 @@ def find_camera():
         shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
     '''
     cam_model = subprocess.run("cat /sys/class/video4linux/*/name | \
-        awk '/See3CAM_130/ || /mxc-mipi-csi2.1/ {print $1}'", \
+        awk '/Video Capture 4/ || /mxc-mipi-csi2.1/ {print $1}'", \
         shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
 
-    if cam_model == "See3CAM_130":
+    if cam_model == "Video":
         sys.stdout.write("See3CAM_130 FOUND\n")
         return "ok"   
     if cam_model == "mxc-mipi-csi2.1":
@@ -70,6 +69,7 @@ def find_modem():
     try:
         modem.open()
     except:
+        res = "err"
         sys.stderr.write("Cannot open modem")
 
     if modem.isOpen():
@@ -81,11 +81,14 @@ def find_modem():
                 res = "ok"
                 break
             else:
-                sys.stderr.write("MODEM NOT FOUND\n")
+                # sys.stderr.write("MODEM NOT FOUND\n")
                 res = "err"
             time.sleep(2)
         modem.close()
 
+    if res == "err":
+        sys.stderr.write("MODEM NOT FOUND\n")
+        
     return res
 
 if __name__ == "__main__":
@@ -120,3 +123,4 @@ if __name__ == "__main__":
             json.dump(data, file, indent=4, separators=(',', ':'))
     except FileNotFoundError:
         sys.stderr.write("File not found")
+
