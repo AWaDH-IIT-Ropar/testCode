@@ -1,0 +1,10 @@
+[Unit]
+Description=Dependent Device detection Service
+After=devdetect.service
+Requires=devdetect.service
+
+[Service]
+ExecStart=/bin/bash -c "echo Dependent service - running"
+
+[Install]
+# WantedBy=multi-user.target
