@@ -1,0 +1,10 @@
+[Unit]
+Description=Core temperature logging
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -u /home/root/ws/temp.py
+
+[Install]
+WantedBy=multi-user.target
+

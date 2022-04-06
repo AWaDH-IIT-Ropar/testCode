@@ -7,4 +7,4 @@ Requires=devdetect.service
 ExecStart=/bin/bash -c "echo Dependent service - running"
 
 [Install]
-# WantedBy=multi-user.target
+WantedBy=multi-user.target
