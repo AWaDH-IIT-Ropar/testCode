@@ -1,17 +1,12 @@
 [Unit]
 Description=Device detection Service
-# After=
-# Wants=
-# Requires=
 
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/python3 -u /home/root/ws/sensors.py
 RemainAfterExit=no
-# RestartSec=5
+RestartSec=5
 Restart=on-failure
-StandardOutput=file:/var/tmp/dev-detect.log
-StandardError=inherit
 
 [Install]
 # WantedBy=multi-user.target
