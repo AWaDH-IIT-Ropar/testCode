@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Entomologist</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='icons/css/line-awesome.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/dashboard.css')}}">
+</head>
+<body>
+    <input type="checkbox" id="nav-toggle">
+    <!-- ---------Sidebar starting---------------- -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <h2><i class="las la-dove"></i><span>Digital Entomologist</span></h2>
+        </div>
+        <div class="sidebar-menu">
+            <ul>
+                <li> 
+                    <a href="#" class="active">
+                        <i class="las la-tv"></i><span>Dashboard</span>
+                    </a>
+                </li>
+                <li> 
+                    <a href="{{url_for('video')}}">
+                        <i class="las la-video"></i><span>Stream Cam</span>
+                    </a>
+                </li>
+                <li> 
+                    <a href="#">
+                        <i class="las la-chart-line"></i><span>Metrics</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ---------- Main content box starting ------------------ -->
+    <div class="main-content">
+        <!-- ----Header section---- -->
+        <header>
+            <h1>
+                <label for="nav-toggle"><i class="las la-bars"></i></label>
+                Dashboard
+            </h1>
+            <h1 id="nameDisplay">Hi, Pratyush</h1>
+            <div>
+                <a href="{{url_for('logout')}}"><i class="las la-sign-out-alt" style="font-size: 36px;color:black"></i>
+                    <p style="font-size: 11px;position:relative;top:-5px;color:black">logout</p>
+                </a>
+            </div>
+        </header>
+
+        <!-- Main section -->
+        <main>
+            <!-- ---upper segment for cards -->
+            <div class="cards">
+                <div class="card">
+                    <div>
+                        <h1>58%</h1>
+                        <span>CPU utilization</span>
+                    </div>
+                    <div>
+                        <i class="las la-heartbeat" style="font-size:4rem;"></i>
+                    </div>
+                </div>
+                <div class="card">
+                    <div>
+                        <h1>09%</h1>
+                        <span>Battery</span>    
+                    </div>
+                    <div>
+                        <i class="las la-battery-half" style="font-size:4rem;"></i>
+                    </div>
+                </div>
+                <div class="card">
+                    <div>
+                        <h1>56</h1>
+                        <span>Temperature</span>    
+                    </div>
+                    <div>
+                        <i class="las la-thermometer-half" style="font-size: 4rem;"></i>
+                    </div>
+                </div>
+                <div class="card">
+                    <div>
+                        <h1>578mb</h1>
+                        <span>Data consumption</span>    
+                    </div>
+                </div>
+            </div>
+
+            <!-- ----- bottom container for streaming and dev data -->
+            <div class="info-container">
+                <div class="cam">
+                    Peripheral data
+                </div>
+                <div class="device-info">
+                    Deice data
+                </div>
+            </div>
+
+        </main>
+
+
+    </div>
+</body>
+<script src="{{url_for('static',filename='js/dashboard.js')}}"></script>
+</html> 

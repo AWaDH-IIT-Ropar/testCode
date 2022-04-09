@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Entomologist</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='icons/css/line-awesome.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/videoFeed.css')}}">
+</head>
+<body>
+    <input type="checkbox" id="nav-toggle">
+    <!-- ---------Sidebar starting---------------- -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <h2><i class="las la-dove"></i><span>Digital Entomologist</span></h2>
+        </div>
+        <div class="sidebar-menu">
+            <ul>
+                <li> 
+                    <a href="{{url_for('dashboard')}}" >
+                        <i class="las la-tv"></i><span>Dashboard</span>
+                    </a>
+                </li>
+                <li> 
+                    <a href="#" class="active">
+                        <i class="las la-video"></i><span>Stream Cam</span>
+                    </a>
+                </li>
+                <li> 
+                    <a href="#">
+                        <i class="las la-chart-line"></i><span>Metrics</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ---------- Main content box starting ------------------ -->
+    <div class="main-content">
+        <!-- ----Header section---- -->
+        <header>
+            <h1>
+                <label for="nav-toggle"><i class="las la-bars"></i></label>
+                Video Streaming
+            </h1>
+            <h1 id="nameDisplay">Hi, Pratyush</h1>
+            <div>
+                <a href="{{url_for('logout')}}"><i class="las la-sign-out-alt" style="font-size: 36px;color:black"></i></a>
+                <p style="font-size: 11px;position:relative;top:-5px;">logout</p>
+            </div>
+        </header>
+
+        <!-- Main section -->
+        <main>
+            <div class="video-feed-container">
+                <div class="cam">
+                    <img src="{{url_for('videoFeed')}}" width="100%" height="100%" alt="">
+                </div>
+            </div>
+
+        </main>
+
+
+    </div>
+</body>
+</html> 
