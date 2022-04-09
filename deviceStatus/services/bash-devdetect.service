@@ -1,0 +1,9 @@
+[Unit]
+Description=Device detection by bash
+
+[Service]
+Type=oneshot
+ExecStart=/home/root/ws/sensors-bash.sh
+RemainAfterExit=no
+RestartSec=5
+Restart=on-failure

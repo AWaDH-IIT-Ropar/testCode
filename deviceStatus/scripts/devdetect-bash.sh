@@ -4,18 +4,18 @@
 VEML7700=$(i2cdetect -y -r 4 | awk '/10/ {print $2}')
 
 if [ $VEML7700 = 10 ]; then
-        echo "1" > /var/tmp/VEML7700
+        echo "0" > /var/tmp/VEML7700
 else
-    	echo "0" > /var/tmp/VEML7700
+    	echo "1" > /var/tmp/VEML7700
 fi
 
 # Find hts221
 HTS221=$(i2cdetect -y -r 4 | awk '/50/ {print $17}')
 
 if [ $HTS221 = 5f ]; then
-        echo "1" > /var/tmp/HTS221
+        echo "0" > /var/tmp/HTS221
 else
-    	echo "0" > /var/tmp/HTS221
+    	echo "1" > /var/tmp/HTS221
 fi
 
 # Find modem
@@ -31,10 +31,10 @@ while [[ -z "$MODEM" && "$COUNT" -ne 0 ]]; do
 done
 
 if [ $MODEM = "OK" ]; then
-	echo "1" > /var/tmp/MODEM
+	echo "0" > /var/tmp/MODEM
 	echo "found"
 else
-	echo "0" > /var/tmp/MODEM
+	echo "1" > /var/tmp/MODEM
 	echo "not found"
 fi
 
@@ -46,13 +46,13 @@ if [ $CAM = "mxc-mipi-csi2.1" ]; then
 elif [$CAM = "Video" ]; then
 	echo "usb" > /var/tmp/CAM
 else
-	echo "0" > /var/tmp/CAM
+	echo "1" > /var/tmp/CAM
 fi
 
 # Find memory card
 dmesg | grep 'mmc1: new' > /dev/null
 if [ $? = 0 ]; then
-	echo "1" > /var/tmp/MMC
-else
 	echo "0" > /var/tmp/MMC
+else
+	echo "1" > /var/tmp/MMC
 fi
