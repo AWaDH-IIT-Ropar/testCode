@@ -18,26 +18,6 @@ else
     	echo "1" > /var/tmp/HTS221
 fi
 
-# Find modem
-# MODEM=$(echo -ne "AT\r\n" | microcom -t 5 -X /dev/ttyUSB2 -s 115200 | grep "OK")
-
-sleep 10
-MODEM=$(echo -ne "AT\r\n" | microcom -t 100 -X /dev/ttyUSB2 -s 115200 | awk '/OK/ {print $1}')
-
-# check if MODEM is  empty variable
-COUNT=100
-while [[ -z "$MODEM" && "$COUNT" -ne 0 ]]; do
-    MODEM=$(echo -ne "AT\r\n" | microcom -t 100 -X /dev/ttyUSB2 -s 115200 | awk '/OK/ {print $1}')
-done
-
-if [ $MODEM = "OK" ]; then
-	echo "0" > /var/tmp/MODEM
-	echo "found"
-else
-	echo "1" > /var/tmp/MODEM
-	echo "not found"
-fi
-
 # Find camera
 CAM=$(cat /sys/class/video4linux/*/name | awk '/Video Capture 4/ || /mxc-mipi-csi2.1/ {print $1}')
 
@@ -50,9 +30,37 @@ else
 fi
 
 # Find memory card
-dmesg | grep 'mmc1: new' > /dev/null
-if [ $? = 0 ]; then
-	echo "0" > /var/tmp/MMC
+
+# dmesg | grep 'mmc1: new' > /dev/null
+# if [ $? = 0 ]; then
+# 	echo "0" > /var/tmp/MMC
+# else
+# 	echo "1" > /var/tmp/MMC
+# fi
+
+# Detect MMC with hardware detection pin
+MMC=$(cat /sys/kernel/debug/gpio | awk '/gpio-425/ {print $6}')
+
+if [ $MMC = "lo" ]; then
+    echo "0" > /var/tmp/MMC
 else
-	echo "1" > /var/tmp/MMC
+    echo "1" > /var/tmp/MMC
+fi
+
+# Find modem
+# MODEM=$(echo -ne "AT\r\n" | microcom -t 5 -X /dev/ttyUSB2 -s 115200 | grep "OK")
+
+sleep 2
+MODEM=$(echo -ne "AT\r\n" | microcom -t 100 -X /dev/ttyUSB2 -s 115200 | awk '/OK/ {print $1}')
+
+# check if MODEM is  empty variable
+COUNT=100
+while [[ -z "$MODEM" && "$COUNT" -ne 0 ]]; do
+    MODEM=$(echo -ne "AT\r\n" | microcom -t 100 -X /dev/ttyUSB2 -s 115200 | awk '/OK/ {print $1}')
+done
+
+if [ $MODEM = "OK" ]; then
+	echo "0" > /var/tmp/MODEM
+else
+	echo "1" > /var/tmp/MODEM
 fi
