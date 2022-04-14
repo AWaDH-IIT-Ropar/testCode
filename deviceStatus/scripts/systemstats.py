@@ -4,6 +4,7 @@ import deviceInfo
 from datetime import datetime as date
 import sys
 import time
+import subprocess
 
 deviceInfo = deviceInfo.DeviceInfo()
 
@@ -22,16 +23,17 @@ def cpu_info():
             'A72-0': 0.0,
             'A72-1': 0.0
         }
-    }
+    } 
     
     ret['temperatures'] = {
         'A53': deviceInfo.getTemperatureCPUA53(),
         'A72': deviceInfo.getTemperatureCPUA72()
     }
-
+    
     ret['usage'] = deviceInfo.getCPUUsage()
 
     det = deviceInfo.getCPUUsageDetailed()
+    
     ret['usageDetailed'] = {
         'A53-0': det[0],
         'A53-1': det[1],
@@ -77,7 +79,8 @@ def general_info():
 
 def internet_info():
     ret = {
-        'connectivity': "False"
+        'connectivity': "False",
+        'signal': 0
     }
     host = 'http://google.com'
     try:
@@ -89,6 +92,11 @@ def internet_info():
     if connected:
         ret['connectivity'] = "True"
     
+    signal_str = subprocess.run("mmcli -m 0 | \
+        awk '/signal quality/ {print $4}'", \
+        shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('%\n')
+
+    ret['signal'] = signal_str
     return ret
 
 def get_allinfo():
@@ -113,31 +121,7 @@ if __name__ == '__main__':
 
     while True:
         status = get_allinfo()
-
-        try: 
-            with open(f"/home/root/ws/config.conf", 'r') as file:
-                data = json.load(file)
-                ramInterval = data["configuration"]["RAMUPDATE"]
-                diskInterval = data["configuration"]["DISKUPDATE"]
-        except FileNotFoundError:
-            sys.stderr.write("Config File Not found")
-
-        minute = date.now().minute
-
-        if(minute % ramInterval) == 0:
-            try: 
-                with open(f"/tmp/deviceStatus.conf", 'w') as file:
-                    json.dump(status, file, indent=4, separators=(',', ':'))            
-                    print("ram written")
-            except:
-                sys.stderr.write("Ram Exception")
-
-        if(minute % diskInterval) == 0:
-            try:
-                with open(f"/var/tmp/deviceStatus.conf", 'a') as file:
-                    json.dump(status, file, indent=4, separators=(',', ':'))
-                    print("disk written")
-            except:
-                sys.stderr.write("Disk Exception")
+        with open(f"/var/tmp/deviceStatus.conf", 'w') as file:
+            json.dump(status, file, indent=4, separators=(',', ':'))
         
         time.sleep(10)
