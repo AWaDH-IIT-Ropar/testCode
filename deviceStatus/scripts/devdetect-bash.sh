@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# 0 in the file means detected
+# 1 in the file means not detected
+
 # Find veml7700
 VEML7700=$(i2cdetect -y -r 4 | awk '/10/ {print $2}')
 
