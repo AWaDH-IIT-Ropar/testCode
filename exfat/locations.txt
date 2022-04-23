@@ -1,0 +1,24 @@
+reference:
+https://serverfault.com/questions/766506/automount-usb-drives-with-systemd/767079#767079
+
+
+/usr/local/bin/usb-mount.sh
+/etc/systemd/system/usb-mount@.service
+/etc/udev/rules.d/99-local.rules
+
+This seems to do the trick! A couple of useful commands for debugging stuff like this:
+
+udevadm control -l debug turns on verbose logging to /var/log/syslog so you can see what's happening.
+udevadm control --reload-rules after you modify files in the rules.d dir (may not be necessary, but can't hurt...).
+systemctl daemon-reload after you modify systemd unit files
+
+cp ./usb-mount.sh /usr/local/bin/
+
+# Systemd unit file for USB automount/unmount 
+cp ./usb-mount@.service /etc/systemd/system/usb-mount@.service
+
+# Create udev rule to start/stop usb-mount@.service on hotplug/unplug
+cat ./99-local.rules.usb-mount >> /etc/udev/rules.d/99-local.rules
+
+systemctl daemon-reload
+udevadm control --reload-rules
