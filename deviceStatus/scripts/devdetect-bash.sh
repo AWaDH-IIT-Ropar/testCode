@@ -23,7 +23,7 @@ CAM=$(cat /sys/class/video4linux/*/name | awk '/Video Capture 4/ || /mxc-mipi-cs
 
 if [ $CAM = "mxc-mipi-csi2.1" ]; then
 	echo "csi" > /var/tmp/CAM
-elif [$CAM = "Video" ]; then
+elif [ $CAM = "Video" ]; then
 	echo "usb" > /var/tmp/CAM
 else
 	echo "1" > /var/tmp/CAM
