@@ -54,12 +54,14 @@ fi
 ########################## CAMERA ############################
 CAM=$(cat /sys/class/video4linux/*/name | awk '/Video Capture 4/ || /mxc-mipi-csi2.1/ {print $1}')
 
-if [ $CAM = "mxc-mipi-csi2.1" ]; then
-	echo "csi" > /var/tmp/CAM
-elif [ $CAM = "Video" ]; then
-	echo "usb" > /var/tmp/CAM
-else
+if [[ -z "$CAM" ]]; then
 	echo "1" > /var/tmp/CAM
+else
+	if [ $CAM = "mxc-mipi-csi2.1" ]; then
+		echo "csi" > /var/tmp/CAM
+	elif [ $CAM = "Video" ]; then
+		echo "usb" > /var/tmp/CAM
+	fi
 fi
 ########################## CAMERA ############################
 
@@ -71,6 +73,19 @@ if [ $MMC = "lo" ]; then
 else
     echo "1" > /var/tmp/MMC
 fi
+
+RAND_W=$(cat /proc/sys/kernel/random/uuid)
+echo $RAND_W > /media/mmcblk1p1/random
+
+RAND_R=$(cat /media/mmcblk1p1/random)
+
+if [[ $RAND_W = $RAND_R ]]; then
+	echo "verified" >> /var/tmp/MMC
+else
+	echo "error" >> /var/tmp/MMC
+fi
+
+rm -f /media/mmcblk1p1/random
 ########################## MMC ###############################
 
 ########################## MODEM #############################
@@ -81,6 +96,7 @@ MODEM=$(echo -ne "AT\r\n" | microcom -t 100 -X /dev/ttyUSB2 -s 115200 | awk '/OK
 COUNT=100
 while [[ -z "$MODEM" && "$COUNT" -ne 0 ]]; do
     MODEM=$(echo -ne "AT\r\n" | microcom -t 100 -X /dev/ttyUSB2 -s 115200 | awk '/OK/ {print $1}')
+    ((COUNT--))
 done
 
 if [ $MODEM = "OK" ]; then
