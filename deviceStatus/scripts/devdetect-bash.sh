@@ -1,119 +1,234 @@
 #!/bin/bash
 
-# 0 in the file means detected
-# 1 in the file means not detected
+# variable names are in caps
 
-########################## veml7700 ##########################
-VEML7700=$(i2cdetect -y -r 4 | awk '/10/ {print $2}')
+function veml7700_detect () {
+    local CHECK=$(i2cdetect -y -r 4 | awk '/10/ {print $2}')
 
-if [ $VEML7700 = 10 ]; then
-        echo "0" > /var/tmp/VEML7700
-else
-    	echo "1" > /var/tmp/VEML7700
-fi
+    if [ $CHECK = 10 ]; then
+        VEML7700_DETECT="true"
+    else
+        VEML7700_DETECT="false"
+    fi
+}
 
-VEML7700=$(/usr/sbin/weather/VEML7700 | awk '{print $4}')
-if [ $(echo "$VEML7700>4000" | bc) = 1 ]; then
-	echo "error" >> /var/tmp/VEML7700
-elif [ $(echo "$VEML7700<0" | bc) = 1 ]; then
-	echo "error" >> /var/tmp/VEML7700
-else
-    echo "verified" >> /var/tmp/VEML7700
-fi
-########################## veml7700 ##########################
+function veml7700_verify () {
+    local CHECK=$(/usr/sbin/weather/VEML7700 | awk '{print $4}')
 
-########################## HTS221 ############################
-HTS221=$(i2cdetect -y -r 4 | awk '/50/ {print $17}')
+    if [ -z $CHECK ]; then
+        $(/usr/sbin/weather/VEML7700)
+        VEML7700_NOTE="$(echo $?)"
+        VEML7700_VERIFY="cmd_err"
+    elif [ $(echo "$CHECK>4000" | bc) = 1 ]; then
+        VEML7700_VERIFY="value_err_hi"
+    elif [ $(echo "$CHECK<0" | bc) = 1 ]; then
+        VEML7700_VERIFY="value_err_lo"
+    else
+        VEML7700_VERIFY="true"
+    fi
+}
 
-if [ $HTS221 = 5f ]; then
-        echo "0" > /var/tmp/HTS221
-else
-    	echo "1" > /var/tmp/HTS221
-fi
+function hts221_detect () {
+    local CHECK=$(i2cdetect -y -r 4 | awk '/50/ {print $17}')
 
-HTS221_TEMP=$(/usr/sbin/weather/hts221 | awk '/Celsius/ {print $5}')
-HTS221_HUM=$(/usr/sbin/weather/hts221 | awk '/humidity/ {print $4}')
+    if [ $CHECK = 5f ]; then
+        HTS221_DETECT="true"
+    else
+        HTS221_DETECT="false"
+    fi
+}
 
-if [ $(echo "$HTS221_HUM>100" | bc) = 1 ]; then
-	echo "humidity error" >> /var/tmp/HTS221
-elif [ $(echo "$HTS221_HUM<0" | bc) = 1 ]; then
-	echo "humidity error" >> /var/tmp/HTS221
-else
-    	echo "humidity verified" >> /var/tmp/HTS221
-fi
+function hts221_verify () {
+    local CHECK_TEMP=$(/usr/sbin/weather/hts221 | awk '/Celsius/ {print $5}')
+    local CHECK_HUM=$(/usr/sbin/weather/hts221 | awk '/humidity/ {print $4}')
 
-if [ $(echo "$HTS221_TEMP>120" | bc) = 1 ]; then
-	echo "temperature error" >> /var/tmp/HTS221
-elif [ $(echo "$HTS221_TEMP<-40" | bc) = 1 ]; then
-	echo "temperature error" >> /var/tmp/HTS221
-else
-    	echo "temperature verified" >> /var/tmp/HTS221
-fi
-########################## HTS221 ############################
+    if [ -z "$CHECK_HUM" ]; then
+        $(/usr/sbin/weather/hts221)
+        HTS221_NOTE="$(echo $?)"
+        HTS221_VERIFY_HUM="cmd_err"
+    elif [ $(echo "$CHECK_HUM>100" | bc) = 1 ]; then
+        HTS221_VERIFY_HUM="value_err_hi"
+    elif [ $(echo "$CHECK_HUM<0" | bc) = 1 ]; then
+        HTS221_VERIFY_HUM="value_err_lo"
+    else
+        HTS221_VERIFY_HUM="true"
+    fi
 
-########################## CAMERA ############################
-CAM=$(cat /sys/class/video4linux/*/name | awk '/Video Capture 4/ || /mxc-mipi-csi2.1/ {print $1}')
+    if [ -z "$CHECK_TEMP" ]; then
+        $(/usr/sbin/weather/hts221)
+        HTS221_NOTE="$(echo $?)"
+        HTS221_VERIFY_TEMP="cmd_err"
+    elif [ $(echo "$CHECK_TEMP>120" | bc) = 1 ]; then
+        HTS221_VERIFY_TEMP="value_err_hi"
+    elif [ $(echo "$CHECK_TEMP<-40" | bc) = 1 ]; then
+        HTS221_VERIFY_TEMP="value_err_lo"
+    else
+        HTS221_VERIFY_TEMP="true"
+    fi
+}
 
-if [[ -z "$CAM" ]]; then
-	echo "1" > /var/tmp/CAM
-else
-	if [ $CAM = "mxc-mipi-csi2.1" ]; then
-		echo "csi" > /var/tmp/CAM
-	elif [ $CAM = "Video" ]; then
-		echo "usb" > /var/tmp/CAM
-	fi
-fi
-########################## CAMERA ############################
+function camera_detect () {
+    local CHECK=$(cat /sys/class/video4linux/*/name | awk '/Video Capture 4/ || /mxc-mipi-csi2.1/ {print $1}')
 
-########################## MMC ###############################
-MMC=$(cat /sys/kernel/debug/gpio | awk '/gpio-425/ {print $6}')
+    if [[ -z "$CHECK" ]]; then
+        CAM_DETECT="false"
+    else
+        CAM_DETECT="true"
+        if [ $CHECK = "mxc-mipi-csi2.1" ]; then
+            CAM_MODEL="csi"
+        elif [ $CHECK = "Video" ]; then
+            CAM_MODEL="usb"
+        fi
+    fi
+}
 
-if [ $MMC = "lo" ]; then
-    echo "0" > /var/tmp/MMC
-else
-    echo "1" > /var/tmp/MMC
-fi
+function camera_verify () {
+    echo "camera verify"
+}
 
-RAND_W=$(cat /proc/sys/kernel/random/uuid)
-echo $RAND_W > /media/mmcblk1p1/random
+function mmc_detect () {
+    local CHECK=$(cat /sys/kernel/debug/gpio | awk '/gpio-425/ {print $6}')
 
-RAND_R=$(cat /media/mmcblk1p1/random)
+    if [ $CHECK = "lo" ]; then
+        MMC_DETECT="true"
+    else
+        MMC_DETECT="false"
+    fi
+}
 
-if [[ $RAND_W = $RAND_R ]]; then
-	echo "verified" >> /var/tmp/MMC
-else
-	echo "error" >> /var/tmp/MMC
-fi
+function mmc_verify () {
+    local RAND_W=$(cat /proc/sys/kernel/random/uuid)
+    echo $RAND_W > /media/mmcblk1p1/random
 
-rm -f /media/mmcblk1p1/random
-########################## MMC ###############################
+    local RAND_R=$(cat /media/mmcblk1p1/random)
 
-########################## MODEM #############################
-sleep 2
-MODEM=$(echo -ne "AT\r\n" | microcom -t 100 -X /dev/ttyUSB2 -s 115200 | awk '/OK/ {print $1}')
+    if [[ $RAND_W = $RAND_R ]]; then
+        MMC_VERIFY="true"
+    else
+        MMC_VERIFY="false"
+    fi
 
-# check if MODEM is  empty variable
-COUNT=100
-while [[ -z "$MODEM" && "$COUNT" -ne 0 ]]; do
-    MODEM=$(echo -ne "AT\r\n" | microcom -t 100 -X /dev/ttyUSB2 -s 115200 | awk '/OK/ {print $1}')
-    ((COUNT--))
+    rm -f /media/mmcblk1p1/random
+}
+
+function modem_detect () {
+    local CHECK=$(echo -ne "AT\r\n" | microcom -t 100 -X /dev/ttyUSB2 -s 115200 | awk '/OK/ {print $1}')
+    
+    if [ -z "$CHECK" ]; then
+        MODEM_DETECT="false"
+        MODEM_NOTE="cmd_err"
+    elif [ $CHECK = "OK" ]; then
+        MODEM_DETECT="true"
+    else
+        echo 
+    fi
+}
+
+function modem_verify () {
+    mmcli -m 0 > /dev/null
+    if [ "echo $?" = 1 ]; then
+        MODEM_NOTE="cmd_err"
+        MODEM_VERIFY="false"
+    fi
+
+    if [ "$MODEM_NOTE" != "cmd_err" ]; then
+
+        L1=$(mmcli -m 0 | awk '/Status/ {print NR}')
+        L2=`expr $(mmcli -m 0 | awk '/Modes/ {print NR}') - 2`
+
+        MODEM_STATE=$(mmcli -m 0 | awk -v l1=$L1 -v l2=$L2 'NR == l1,NR == l2 {print $0}' | awk '/state/ {print $0}' | awk 'NR == 1 {print $NF}')
+
+        #if modem disabled, enable it
+        if [[ "$MODEM_DETECT" == "true" && "$MODEM_STATE" == "disabled" ]]; then
+            mmcli -m 0 -e > /dev/null
+        fi
+
+        MODEM_STATE=$(mmcli -m 0 | awk -v l1=$L1 -v l2=$L2 'NR == l1,NR == l2 {print $0}' | awk '/state/ {print $0}' | awk 'NR == 1 {print $NF}')
+        MODEM_SIGNAL=$(mmcli -m 0 | awk '/signal/ {print $4}')
+        MODEM_FAILED_REASON=$(mmcli -m 0 | awk '/failed reason/ {print $4}')
+
+    fi
+}
+
+function battery_guage_detect () {
+    local CHECK=$(i2cdetect -y -r 4 | awk '/50/ {print $7}')
+
+    if [ $CHECK = 55 ]; then
+        BATT_GUAGE_DETECT="true"
+    else
+        BATT_GUAGE_DETECT="false"
+    fi
+}
+
+function battery_guage_verify () {
+    i2cset -y 4 0x55 0x00 0x0001 w
+    local CHECK=$(i2cget -y 4 0x55 0x00 w | awk '{print $0}')
+
+    if [ -z "$CHECK" ]; then
+        BATT_GUAGE_VERIFY="false"
+        BATT_GUAGE_NOTE="cmd_err"
+    fi
+    if [ $CHECK = 0x0100 ]; then
+        BATT_GUAGE_VERIFY="true"
+    fi
+}
+
+while true; do 
+    dmesg | grep "pcie_switch: disabling"
+    if [ $? = 0 ]; then
+        echo "foundit"
+        break
+    fi
+    sleep 1
 done
 
-if [ $MODEM = "OK" ]; then
-	echo "0" > /var/tmp/MODEM
+# veml7700
+veml7700_detect
+if [ "$VEML7700_DETECT" == "true" ]; then
+    veml7700_verify
 else
-	echo "1" > /var/tmp/MODEM
+    VEML7700_VERIFY="false"
 fi
 
-L1=$(mmcli -m 0 | awk '/Status/ {print NR}')
-L2=`expr $(mmcli -m 0 | awk '/Modes/ {print NR}') - 2`
+# hts221
+hts221_detect
+if [ "$HTS221_DETECT" == "true" ]; then
+    hts221_verify
+else
+    HTS221_VERIFY_HUM="false"
+    HTS221_VERIFY_TEMP="false"
+fi
 
-STATE=$(mmcli -m 0 | awk -v l1=$L1 -v l2=$L2 'NR == l1,NR == l2 {print $0}' | awk '/state/ {print $0}' | awk 'NR == 1 {print $NF}')
-SIGNAL=$(mmcli -m 0 | awk '/signal/ {print $4}')
+# camera
+camera_detect
+if [ "$CAM_DETECT" == "true" ]; then
+    camera_verify
+else
+    CAM_VERIFY="false"
+fi
 
-echo "state: $STATE" >> /var/tmp/MODEM
-# if [ $STATE = "failed" ]; then
-    echo "failed reason: $(mmcli -m 0 | awk '/failed reason/ {print $4}')" >> /var/tmp/MODEM
-# fi
-echo "signal: $SIGNAL" >> /var/tmp/MODEM
-########################## MODEM #############################
+# mmc
+mmc_detect
+if [ "$MMC_DETECT" == "true" ]; then
+    mmc_verify
+else
+    MMC_VERIFY="false"
+fi
+
+modem_detect
+if [ "$MODEM_DETECT" == "true" ]; then
+    modem_verify
+else
+    MODEM_VERIFY="false"
+fi
+
+# battery guage ic
+battery_guage_detect
+if [ "$BATT_GUAGE_DETECT" == "true" ]; then
+    battery_guage_verify
+else
+    BATT_GUAGE_VERIFY="false"
+fi
+
+
+echo "{\"veml7700\":{\"detect\":\"$VEML7700_DETECT\",\"verify\":\"$VEML7700_VERIFY\",\"note\":\"$VEML7700_NOTE\"},\"hts221\":{\"detect\":\"$HTS221_DETECT\",\"verify\":{\"temp\":\"$HTS221_VERIFY_TEMP\",\"humidity\":\"$HTS221_VERIFY_HUM\"},\"note\":\"$HTS221_NOTE\"},\"battery_ic\":{\"detect\":\"$BATT_GUAGE_DETECT\",\"verify\":\"$BATT_GUAGE_VERIFY\",\"note\":\"$BATT_GUAGE_NOTE\"},\"mmc\":{\"detect\":\"$MMC_DETECT\",\"verify\":\"$MMC_VERIFY\",\"note\":\"$MMC_NOTE\"},\"camera\":{\"detect\":\"$CAM_DETECT\",\"model\":\"$CAM_MODEL\",\"verify\":\"$CAM_VERIFY\",\"note\":\"$CAM_NOTE\"},\"modem\":{\"detect\":\"$MODEM_DETECT\",\"verify\":\"$MODEM_VERIFY\",\"state\":\"$MODEM_STATE\",\"failedreason\":\"$MODEM_FAILED_REASON\",\"signal\":\"$MODEM_SIGNAL\",\"note\":\"$MODEM_NOTE\"}}" > /var/tmp/somefile
