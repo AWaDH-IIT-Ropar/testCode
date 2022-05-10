@@ -5,6 +5,7 @@ from datetime import datetime as date
 import sys
 import time
 import subprocess
+from os.path import exists
 
 deviceInfo = deviceInfo.DeviceInfo()
 
@@ -112,29 +113,33 @@ def data_usage_info():
 
 def power_info():
     ret = {
-        "battery_temp": "",
-        "voltage": "",
-        "avg_current": "",
-        "current": ""
-    }
-    temp = subprocess.run("cat /tmp/battery_parameters | awk '/Temperature/ {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
-    temp = float(temp)
+            "battery_temp": 0,
+            "voltage": 0,
+            "avg_current": 0,
+            "current": 0
+        }
 
-    voltage = subprocess.run("cat /tmp/battery_parameters | awk '/Voltage/ {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
-    voltage = float(voltage)/1000
+    if(exists("/tmp/battery_parameters")):
+        temp = subprocess.run("cat /tmp/battery_parameters | awk '/Temperature/ {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+        temp = float(temp)
 
-    avg_current = subprocess.run("cat /tmp/battery_parameters | awk '/Average Current/ {print $4}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
-    avg_current = float(avg_current)/1000
+        voltage = subprocess.run("cat /tmp/battery_parameters | awk '/Voltage/ {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+        voltage = float(voltage)/1000
 
-    current = subprocess.run("cat /tmp/battery_parameters | awk 'NR == 4 {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
-    current = float(current)/1000
+        avg_current = subprocess.run("cat /tmp/battery_parameters | awk '/Average Current/ {print $4}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+        avg_current = float(avg_current)/1000
 
-    ret['battery_temp'] = temp
-    ret['voltage'] = voltage
-    ret['avg_current'] = avg_current
-    ret['current'] = current
+        current = subprocess.run("cat /tmp/battery_parameters | awk 'NR == 4 {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+        current = float(current)/1000
 
-    return ret
+        ret['battery_temp'] = temp
+        ret['voltage'] = voltage
+        ret['avg_current'] = avg_current
+        ret['current'] = current
+
+        return ret
+    else:
+        return ret
 
 def get_allinfo():
     getCpu = cpu_info()
@@ -162,7 +167,7 @@ if __name__ == '__main__':
 
     while True:
         status = get_allinfo()
-        with open(f"/var/tmp/deviceStatus.conf", 'w') as file:
+        with open(f"/var/tmp/devicestats", 'w') as file:
             json.dump(status, file, indent=4, separators=(',', ':'))
         
         time.sleep(10)
