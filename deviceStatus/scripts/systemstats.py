@@ -106,8 +106,34 @@ def data_usage_info():
     }
     data = subprocess.run("vnstat -i eth0 --json y", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
     dataj = json.loads(data)
-    ret['rx'] = dataj["interfaces"][0]["traffic"]["total"]["rx"]
-    ret['tx'] = dataj["interfaces"][0]["traffic"]["total"]["tx"]
+    ret['rx'] = dataj["interfaces"][0]["traffic"]["total"]["rx"]/(1024*1024)
+    ret['tx'] = dataj["interfaces"][0]["traffic"]["total"]["tx"]/(1024*1024)
+    return ret
+
+def power_info():
+    ret = {
+        "battery_temp": "",
+        "voltage": "",
+        "avg_current": "",
+        "current": ""
+    }
+    temp = subprocess.run("cat /tmp/battery_parameters | awk '/Temperature/ {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+    temp = float(temp)
+
+    voltage = subprocess.run("cat /tmp/battery_parameters | awk '/Voltage/ {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+    voltage = float(voltage)/1000
+
+    avg_current = subprocess.run("cat /tmp/battery_parameters | awk '/Average Current/ {print $4}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+    avg_current = float(avg_current)/1000
+
+    current = subprocess.run("cat /tmp/battery_parameters | awk 'NR == 4 {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+    current = float(current)/1000
+
+    ret['battery_temp'] = temp
+    ret['voltage'] = voltage
+    ret['avg_current'] = avg_current
+    ret['current'] = current
+
     return ret
 
 def get_allinfo():
@@ -117,7 +143,8 @@ def get_allinfo():
     getGeneral = general_info()
     getInternet = internet_info()
     getData = data_usage_info()
-    
+    getPower = power_info()
+
     ret = {
         "time" : date.isoformat(date.now()),
         "cpuInfo": getCpu,
@@ -125,8 +152,8 @@ def get_allinfo():
         "ramInfo": getRam,
         "generalInfo": getGeneral,
         "internet": getInternet,
-        "dataInfo": getData
-
+        "dataInfo": getData,
+        "powerInfo": getPower
     }
 
     return ret
