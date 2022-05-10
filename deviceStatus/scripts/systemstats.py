@@ -99,20 +99,34 @@ def internet_info():
     ret['signal'] = signal_str
     return ret
 
+def data_usage_info():
+    ret = {
+        "rx": 0,
+        "tx": 0
+    }
+    data = subprocess.run("vnstat -i eth0 --json y", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+    dataj = json.loads(data)
+    ret['rx'] = dataj["interfaces"][0]["traffic"]["total"]["rx"]
+    ret['tx'] = dataj["interfaces"][0]["traffic"]["total"]["tx"]
+    return ret
+
 def get_allinfo():
     getCpu = cpu_info()
     getGpu = gpu_info()
     getRam = ram_info()
     getGeneral = general_info()
     getInternet = internet_info()
-
+    getData = data_usage_info()
+    
     ret = {
         "time" : date.isoformat(date.now()),
         "cpuInfo": getCpu,
         "gpuInfo": getGpu,
         "ramInfo": getRam,
         "generalInfo": getGeneral,
-        "internet": getInternet
+        "internet": getInternet,
+        "dataInfo": getData
+
     }
 
     return ret
