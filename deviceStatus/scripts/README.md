@@ -1,16 +1,8 @@
 ## devdetect-bash.sh (Device Detection)
 
 ### Overview
-* This scripts outputs either a _'0'_ (on detection success) or _'1'_ (on detection failure). In case of camera, either _'usb'_ or _'csi'_ will be written to file, depending on the camera attached.
-* These values are stored in a file 
-> /var/tmp/device-name
-  
-where device-name are:
-  1. 'VEML7700', i2c sensor
-  2. 'HTS221', i2c sensor
-  3. 'CAM', camera.
-  4. 'MMC', memorycard
-  5. 'MODEM', 4G modem
+* The status of detection and stored in json format in a file
+> /var/tmp/somefile
   
 ### Execution
 * Save the file in the required directory
@@ -22,6 +14,58 @@ $ chmod 777 devdetect-bash.sh
 ```
 $ ./devdetect-bash.sh
 ```
+
+### Output
+* The script outputs datat in json
+```
+{
+    "veml7700":{
+        "detect":"true",
+        "verify":"true",
+        "note":""
+    },
+    "hts221":{
+        "detect":"true",
+        "verify":{
+            "temp":"true",
+            "humidity":"true"
+        },
+        "note":""
+    },
+    "battery_ic":{
+        "detect":"true",
+        "verify":"true",
+        "note":""
+    },
+    "mmc":{
+        "detect":"true",
+        "verify":"true",
+        "note":""
+    },
+    "camera":{
+        "detect":"true",
+        "model":"usb",
+        "verify":"",
+        "note":""
+    },
+    "modem":{
+        "detect":"false",
+        "verify":"false",
+        "state":"",
+        "failedreason":"",
+        "signal":"",
+        "note":"cmd_err"
+    }
+}
+```
+* The possible values for keys are
+  1. detect: "true", "false"
+  2. verify: "true", "false". NOTE hts221 has temp and humidity keys in verify
+  3. note: some description if any error occurred
+  4. model: "usb", "csi"
+  5. state: modem state
+  6. failed_reason: modem failed reason
+  7. signal: modem signal in percentage eg. "30 %"
 
 ## systemstats.py (System stats)
 
