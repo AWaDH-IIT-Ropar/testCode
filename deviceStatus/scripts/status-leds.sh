@@ -56,43 +56,49 @@ for I in {0..2}; do
     echo 1000000 > /sys/class/pwm/pwmchip$I/pwm0/duty_cycle
 done
 
-sleep 1
+sleep 5
+
+blink "1" "RED"
+blink "1" "GREEN"
+blink "1" "BLUE"
 
 while true; do
 
     if [ -f "$FILE" ]; then
-        # hts221 detect and verify
+        # echo "hts221 detect and verify"
         get_val "['hts221']['detect']"
         HTS221_D=$VAL
-        get_val "['hts221']['verify']"
-        HTS221_V=$VAL
+        get_val "['hts221']['verify']['temp']"
+        HTS221_T_V=$VAL
+        get_val "['hts221']['verify']['humidity']"
+        HTS221_H_V=$VAL
 
-        # veml7700 detect and verify
+        # echo "veml7700 detect and verify"
         get_val "['veml7700']['detect']"
         VEML7700_D=$VAL
         get_val "['veml7700']['verify']"
         VEML7700_V=$VAL
 
-        # modem detect and verify
+        # echo "modem detect and verify"
         get_val "['modem']['detect']"
         MODEM_D=$VAL
         get_val "['modem']['verify']"
         MODEM_V=$VAL
 
-        # camera detect and verify
+        # echo "camera detect and verify"
         get_val "['camera']['detect']"
         CAM_D=$VAL
         get_val "['camera']['verify']"
         CAM_V=$VAL
 
-        # mmc detect and verify
+        # ehco "mmc detect and verify"
         get_val "['mmc']['detect']"
         MMC_D=$VAL
         get_val "['mmc']['verify']"
         MMC_V=$VAL
 
 
-        # battery guage ic detect and verify
+        # echo "battery guage ic detect and verify"
         get_val "['battery_ic']['detect']"
         BATT_GUAGE_D=$VAL
         get_val "['battery_ic']['verify']"
@@ -103,7 +109,7 @@ while true; do
             blink "2" "RED"
             blink "3" "GREEN"
         else
-            if [ "$HTS221_V" == "false" ]; then
+            if [[ "$HTS221_T_V" == "false" || "$HTS221_H_V" == "false" ]]; then
                 blink "2" "YELLOW"
                 blink "3" "GREEN"
             fi
@@ -166,10 +172,9 @@ while true; do
                 blink "2" "BLUE"
             fi
         fi
-        
-        echo "sleeping"
+
         sleep 5
     else
-        echo "file not found"
+        blink "3" "BLUE"
     fi
 done
