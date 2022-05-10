@@ -13,18 +13,22 @@ function veml7700_detect () {
 }
 
 function veml7700_verify () {
-    local CHECK=$(/usr/sbin/weather/VEML7700 | awk '{print $4}')
-
-    if [ -z $CHECK ]; then
-        $(/usr/sbin/weather/VEML7700)
-        VEML7700_NOTE="$(echo $?)"
-        VEML7700_VERIFY="cmd_err"
-    elif [ $(echo "$CHECK>4000" | bc) = 1 ]; then
-        VEML7700_VERIFY="value_err_hi"
-    elif [ $(echo "$CHECK<0" | bc) = 1 ]; then
-        VEML7700_VERIFY="value_err_lo"
+    if [ -f "/usr/sbin/sensor_code/light_intensity" ]; then
+        $(/usr/sbin/sensor_code/light_intensity test)
+        local CHECK=$(cat /tmp/light_intensity | awk '{print $4}')
+        if [ -z $CHECK ]; then
+            VEML7700_NOTE="$(echo $?)"
+            VEML7700_VERIFY="cmd_err"
+        elif [ $(echo "$CHECK>4000" | bc) = 1 ]; then
+            VEML7700_VERIFY="value_err_hi"
+        elif [ $(echo "$CHECK<0" | bc) = 1 ]; then
+            VEML7700_VERIFY="value_err_lo"
+        else
+            VEML7700_VERIFY="true"
+        fi
     else
-        VEML7700_VERIFY="true"
+        VEML7700_NOTE="file_err"
+        VEML7700_VERIFY="false"
     fi
 }
 
@@ -39,31 +43,38 @@ function hts221_detect () {
 }
 
 function hts221_verify () {
-    local CHECK_TEMP=$(/usr/sbin/weather/hts221 | awk '/Celsius/ {print $5}')
-    local CHECK_HUM=$(/usr/sbin/weather/hts221 | awk '/humidity/ {print $4}')
+    
+    if [ -f "/usr/sbin/sensor_code/TH_reading" ]; then
+        $(/usr/sbin/sensor_code/TH_reading test)
+        local CHECK_TEMP=$(cat /tmp/met | awk '/Temperature in C/ {print $4}')
+        local CHECK_HUM=$(cat /tmp/met | awk '/Relative Humidity/ {print $4}')
 
-    if [ -z "$CHECK_HUM" ]; then
-        $(/usr/sbin/weather/hts221)
-        HTS221_NOTE="$(echo $?)"
-        HTS221_VERIFY_HUM="cmd_err"
-    elif [ $(echo "$CHECK_HUM>100" | bc) = 1 ]; then
-        HTS221_VERIFY_HUM="value_err_hi"
-    elif [ $(echo "$CHECK_HUM<0" | bc) = 1 ]; then
-        HTS221_VERIFY_HUM="value_err_lo"
-    else
-        HTS221_VERIFY_HUM="true"
-    fi
+        if [ -z "$CHECK_HUM" ]; then
+            HTS221_NOTE="$(echo $?)"
+            HTS221_VERIFY_HUM="cmd_err"
+        elif [ $(echo "$CHECK_HUM>100" | bc) = 1 ]; then
+            HTS221_VERIFY_HUM="value_err_hi"
+        elif [ $(echo "$CHECK_HUM<0" | bc) = 1 ]; then
+            HTS221_VERIFY_HUM="value_err_lo"
+        else
+            HTS221_VERIFY_HUM="true"
+        fi
 
-    if [ -z "$CHECK_TEMP" ]; then
-        $(/usr/sbin/weather/hts221)
-        HTS221_NOTE="$(echo $?)"
-        HTS221_VERIFY_TEMP="cmd_err"
-    elif [ $(echo "$CHECK_TEMP>120" | bc) = 1 ]; then
-        HTS221_VERIFY_TEMP="value_err_hi"
-    elif [ $(echo "$CHECK_TEMP<-40" | bc) = 1 ]; then
-        HTS221_VERIFY_TEMP="value_err_lo"
+        if [ -z "$CHECK_TEMP" ]; then
+            $(/usr/sbin/weather/hts221)
+            HTS221_NOTE="$(echo $?)"
+            HTS221_VERIFY_TEMP="cmd_err"
+        elif [ $(echo "$CHECK_TEMP>120" | bc) = 1 ]; then
+            HTS221_VERIFY_TEMP="value_err_hi"
+        elif [ $(echo "$CHECK_TEMP<-40" | bc) = 1 ]; then
+            HTS221_VERIFY_TEMP="value_err_lo"
+        else
+            HTS221_VERIFY_TEMP="true"
+        fi
     else
-        HTS221_VERIFY_TEMP="true"
+        HTS221_NOTE="file_err"
+        HTS221_VERIFY_HUM="false"
+        HTS221_VERIFY_TEMP="false"
     fi
 }
 
@@ -136,17 +147,20 @@ function modem_verify () {
         L1=$(mmcli -m 0 | awk '/Status/ {print NR}')
         L2=`expr $(mmcli -m 0 | awk '/Modes/ {print NR}') - 2`
 
-        MODEM_STATE=$(mmcli -m 0 | awk -v l1=$L1 -v l2=$L2 'NR == l1,NR == l2 {print $0}' | awk '/state/ {print $0}' | awk 'NR == 1 {print $NF}')
+        MODEM_STATE=$(mmcli -m 0 | awk -v l1=$L1 -v l2=$L2 'NR == l1,NR == l2 {print $0}' | awk '/state/ {print $0}' | awk 'NR == 1 {print $NF}' | perl -pe 's/\e\[[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]//g;s/\e[PX^_].*?\e\\//g;s/\e\][^\a]*(?:\a|\e\\)//g;s/\e[\[\]A-Z\\^_@]//g;')
 
         #if modem disabled, enable it
         if [[ "$MODEM_DETECT" == "true" && "$MODEM_STATE" == "disabled" ]]; then
             mmcli -m 0 -e > /dev/null
         fi
 
-        MODEM_STATE=$(mmcli -m 0 | awk -v l1=$L1 -v l2=$L2 'NR == l1,NR == l2 {print $0}' | awk '/state/ {print $0}' | awk 'NR == 1 {print $NF}')
-        MODEM_SIGNAL=$(mmcli -m 0 | awk '/signal/ {print $4}')
-        MODEM_FAILED_REASON=$(mmcli -m 0 | awk '/failed reason/ {print $4}')
+        MODEM_STATE=$(mmcli -m 0 | awk -v l1=$L1 -v l2=$L2 'NR == l1,NR == l2 {print $0}' | awk '/state/ {print $0}' | awk 'NR == 1 {print $NF}' | perl -pe 's/\e\[[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]//g;s/\e[PX^_].*?\e\\//g;s/\e\][^\a]*(?:\a|\e\\)//g;s/\e[\[\]A-Z\\^_@]//g;')
+        MODEM_SIGNAL=$(mmcli -m 0 | awk '/signal/ {print $4}' )
+        MODEM_FAILED_REASON=$(mmcli -m 0 | awk '/failed reason/ {print $4}' | perl -pe 's/\e\[[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]//g;s/\e[PX^_].*?\e\\//g;s/\e\][^\a]*(?:\a|\e\\)//g;s/\e[\[\]A-Z\\^_@]//g;')
+    fi
 
+    if [ "$MODEM_STATE" == "failed" ]; then
+        MODEM_VERIFY="false"
     fi
 }
 
@@ -176,7 +190,6 @@ function battery_guage_verify () {
 while true; do 
     dmesg | grep "pcie_switch: disabling"
     if [ $? = 0 ]; then
-        echo "foundit"
         break
     fi
     sleep 1
@@ -231,4 +244,4 @@ else
 fi
 
 
-echo "{\"veml7700\":{\"detect\":\"$VEML7700_DETECT\",\"verify\":\"$VEML7700_VERIFY\",\"note\":\"$VEML7700_NOTE\"},\"hts221\":{\"detect\":\"$HTS221_DETECT\",\"verify\":{\"temp\":\"$HTS221_VERIFY_TEMP\",\"humidity\":\"$HTS221_VERIFY_HUM\"},\"note\":\"$HTS221_NOTE\"},\"battery_ic\":{\"detect\":\"$BATT_GUAGE_DETECT\",\"verify\":\"$BATT_GUAGE_VERIFY\",\"note\":\"$BATT_GUAGE_NOTE\"},\"mmc\":{\"detect\":\"$MMC_DETECT\",\"verify\":\"$MMC_VERIFY\",\"note\":\"$MMC_NOTE\"},\"camera\":{\"detect\":\"$CAM_DETECT\",\"model\":\"$CAM_MODEL\",\"verify\":\"$CAM_VERIFY\",\"note\":\"$CAM_NOTE\"},\"modem\":{\"detect\":\"$MODEM_DETECT\",\"verify\":\"$MODEM_VERIFY\",\"state\":\"$MODEM_STATE\",\"failedreason\":\"$MODEM_FAILED_REASON\",\"signal\":\"$MODEM_SIGNAL\",\"note\":\"$MODEM_NOTE\"}}" > /var/tmp/somefile
+echo "{\"veml7700\":{\"detect\":\"$VEML7700_DETECT\",\"verify\":\"$VEML7700_VERIFY\",\"note\":\"$VEML7700_NOTE\"},\"hts221\":{\"detect\":\"$HTS221_DETECT\",\"verify\":{\"temp\":\"$HTS221_VERIFY_TEMP\",\"humidity\":\"$HTS221_VERIFY_HUM\"},\"note\":\"$HTS221_NOTE\"},\"battery_ic\":{\"detect\":\"$BATT_GUAGE_DETECT\",\"verify\":\"$BATT_GUAGE_VERIFY\",\"note\":\"$BATT_GUAGE_NOTE\"},\"mmc\":{\"detect\":\"$MMC_DETECT\",\"verify\":\"$MMC_VERIFY\",\"note\":\"$MMC_NOTE\"},\"camera\":{\"detect\":\"$CAM_DETECT\",\"model\":\"$CAM_MODEL\",\"verify\":\"$CAM_VERIFY\",\"note\":\"$CAM_NOTE\"},\"modem\":{\"detect\":\"$MODEM_DETECT\",\"verify\":\"$MODEM_VERIFY\",\"state\":\"$MODEM_STATE\",\"failed_reason\":\"$MODEM_FAILED_REASON\",\"signal\":\"$MODEM_SIGNAL\",\"note\":\"$MODEM_NOTE\"}}" > /var/tmp/somefile
