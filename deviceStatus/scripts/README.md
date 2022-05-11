@@ -73,7 +73,7 @@ $ ./devdetect-bash.sh
 
 ### Overview
 * This script outputs a json object every 10s to 
-> /var/tmp/deviceStatus.conf
+> /var/tmp/devicestats
 * The outputs are
   1. time in ISO format
   2. cpu information
