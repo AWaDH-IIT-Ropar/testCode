@@ -13,8 +13,8 @@ function veml7700_detect () {
 }
 
 function veml7700_verify () {
-    if [ -f "/usr/sbin/sensor_code/light_intensity" ]; then
-        $(/usr/sbin/sensor_code/light_intensity test)
+    if [ -f "/usr/sbin/light/light_intensity" ]; then
+        $(/usr/sbin/light/light_intensity test)
         local CHECK=$(cat /tmp/light_intensity | awk '{print $4}')
         if [ -z $CHECK ]; then
             VEML7700_NOTE="$(echo $?)"
@@ -44,8 +44,8 @@ function hts221_detect () {
 
 function hts221_verify () {
     
-    if [ -f "/usr/sbin/sensor_code/TH_reading" ]; then
-        $(/usr/sbin/sensor_code/TH_reading test)
+    if [ -f "/usr/sbin/met/TH_reading" ]; then
+        $(/usr/sbin/met/TH_reading test)
         local CHECK_TEMP=$(cat /tmp/met | awk '/Temperature in C/ {print $4}')
         local CHECK_HUM=$(cat /tmp/met | awk '/Relative Humidity/ {print $4}')
 
@@ -120,6 +120,7 @@ function mmc_verify () {
     fi
 
     rm -f /media/mmcblk1p1/random
+    mkdir /media/mmcblk1p1/upload
 }
 
 function modem_detect () {
