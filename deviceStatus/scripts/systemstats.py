@@ -188,12 +188,13 @@ if __name__ == '__main__':
     while True:
         if (exists("/media/mmcblk1p1/devicestats.csv")):
             status = get_allinfo()
+            # write to file every 10 seconds
             if (((date.now().second)%10) == 0):
                 with open(f"/var/tmp/devicestats", 'w') as file:
                     json.dump(status, file, indent=4, separators=(',', ':'))
             
+            # write to file every 60 seconds
             if (((date.now().second)%60) == 0):
-
                 with open('/media/mmcblk1p1/devicestats.csv', mode='a') as csv_file:
                     fieldnames = ['Date', 'Time', 'Battery-Temp', 'Voltage', 'Avg-Current', 'Current', 'CPU-Usage', 'A53-Temp', 'A53-0-Usage', 'A53-1-Usage', 'A53-2-Usage', 'A53-3-Usage', 'A72-Temp', 'A72-0-Usage', 'A72-1-Usage', 'GPU0-Temp', 'GPU1-Temp', 'GPU-Usage', 'RAM-Usage', 'Ethernet-RX', 'Ethernet-TX', 'WWAN-RX', 'WWAN-TX']
                     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)

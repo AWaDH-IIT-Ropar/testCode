@@ -1,8 +1,8 @@
 #!/bin/bash
 
 RED=0
-GREEN=1
-BLUE=2
+GREEN=2
+BLUE=1
 
 FILE=/var/tmp/somefile
 
