@@ -156,8 +156,14 @@ function modem_verify () {
         fi
 
         MODEM_STATE=$(mmcli -m 0 | awk -v l1=$L1 -v l2=$L2 'NR == l1,NR == l2 {print $0}' | awk '/state/ {print $0}' | awk 'NR == 1 {print $NF}' | perl -pe 's/\e\[[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]//g;s/\e[PX^_].*?\e\\//g;s/\e\][^\a]*(?:\a|\e\\)//g;s/\e[\[\]A-Z\\^_@]//g;')
-        MODEM_SIGNAL=$(mmcli -m 0 | awk '/signal/ {print $4}' )
+        MODEM_SIGNAL=$(mmcli -m 0 | awk '/signal/ {print $4}')
         MODEM_FAILED_REASON=$(mmcli -m 0 | awk '/failed reason/ {print $4}' | perl -pe 's/\e\[[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]//g;s/\e[PX^_].*?\e\\//g;s/\e\][^\a]*(?:\a|\e\\)//g;s/\e[\[\]A-Z\\^_@]//g;')
+
+        if [[ "$MODEM_STATE" == "failed" ]]; then
+            MODEM_VERIFY="false"
+        else
+            MODEM_VERIFY="true"
+        fi
     fi
 
     if [ "$MODEM_STATE" == "failed" ]; then

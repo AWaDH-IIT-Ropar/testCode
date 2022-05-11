@@ -49,7 +49,7 @@ def gpu_info():
     ret = {
         'cores': 2, 
         'temperatures': [],
-        'memoryUsage': deviceInfo.getGPUMemoryUsage()
+        'memoryUsage': float("{:.3f}".format(deviceInfo.getGPUMemoryUsage()))
     }
     
     ret['temperatures'] = {
@@ -113,8 +113,8 @@ def data_usage_info():
     data = subprocess.run("vnstat -i eth0 --json y", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
     try:
         dataj = json.loads(data)
-        ret['ethernet']['rx'] = dataj["interfaces"][0]["traffic"]["total"]["rx"]/(1024*1024)
-        ret['ethernet']['tx'] = dataj["interfaces"][0]["traffic"]["total"]["tx"]/(1024*1024)
+        ret['ethernet']['rx'] = float("{:.3f}".format(dataj["interfaces"][0]["traffic"]["total"]["rx"]/(1024*1024)))
+        ret['ethernet']['tx'] = float("{:.3f}".format(dataj["interfaces"][0]["traffic"]["total"]["tx"]/(1024*1024)))
     except:
         ret['ethernet']['rx'] = 0
         ret['ethernet']['tx'] = 0
@@ -123,8 +123,8 @@ def data_usage_info():
 
     try:
         dataj = json.loads(data)
-        ret['wwan']['rx'] = dataj["interfaces"][0]["traffic"]["total"]["rx"]/(1024*1024)
-        ret['wwan']['tx'] = dataj["interfaces"][0]["traffic"]["total"]["tx"]/(1024*1024)
+        ret['wwan']['rx'] = float("{:.3f}".format(dataj["interfaces"][0]["traffic"]["total"]["rx"]/(1024*1024)))
+        ret['wwan']['tx'] = float("{:.3f}".format(dataj["interfaces"][0]["traffic"]["total"]["tx"]/(1024*1024)))
     except:
         ret['wwan']['rx'] = 0
         ret['wwan']['tx'] = 0
