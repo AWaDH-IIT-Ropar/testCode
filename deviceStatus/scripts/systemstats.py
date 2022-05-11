@@ -1,11 +1,10 @@
 import urllib.request
-import json
 import deviceInfo
 from datetime import datetime as date
-import sys
-import time
 import subprocess
 from os.path import exists
+import csv
+import json
 
 deviceInfo = deviceInfo.DeviceInfo()
 
@@ -102,13 +101,34 @@ def internet_info():
 
 def data_usage_info():
     ret = {
-        "rx": 0,
-        "tx": 0
+        "ethernet": {
+            "rx": 0,
+            "tx": 0
+        },
+        "wwan": {
+            "rx": 0,
+            "tx": 0
+        }
     }
     data = subprocess.run("vnstat -i eth0 --json y", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
-    dataj = json.loads(data)
-    ret['rx'] = dataj["interfaces"][0]["traffic"]["total"]["rx"]/(1024*1024)
-    ret['tx'] = dataj["interfaces"][0]["traffic"]["total"]["tx"]/(1024*1024)
+    try:
+        dataj = json.loads(data)
+        ret['ethernet']['rx'] = dataj["interfaces"][0]["traffic"]["total"]["rx"]/(1024*1024)
+        ret['ethernet']['tx'] = dataj["interfaces"][0]["traffic"]["total"]["tx"]/(1024*1024)
+    except:
+        ret['ethernet']['rx'] = 0
+        ret['ethernet']['tx'] = 0
+
+    data = subprocess.run("vnstat -i wwan0 --json y", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+
+    try:
+        dataj = json.loads(data)
+        ret['wwan']['rx'] = dataj["interfaces"][0]["traffic"]["total"]["rx"]/(1024*1024)
+        ret['wwan']['tx'] = dataj["interfaces"][0]["traffic"]["total"]["tx"]/(1024*1024)
+    except:
+        ret['wwan']['rx'] = 0
+        ret['wwan']['tx'] = 0
+
     return ret
 
 def power_info():
@@ -166,8 +186,21 @@ def get_allinfo():
 if __name__ == '__main__':
 
     while True:
-        status = get_allinfo()
-        with open(f"/var/tmp/devicestats", 'w') as file:
-            json.dump(status, file, indent=4, separators=(',', ':'))
-        
-        time.sleep(10)
+        if (exists("/media/mmcblk1p1/devicestats.csv")):
+            status = get_allinfo()
+            if (((date.now().second)%10) == 0):
+                with open(f"/var/tmp/devicestats", 'w') as file:
+                    json.dump(status, file, indent=4, separators=(',', ':'))
+            
+            if (((date.now().second)%60) == 0):
+
+                with open('/media/mmcblk1p1/devicestats.csv', mode='a') as csv_file:
+                    fieldnames = ['Date', 'Time', 'Battery-Temp', 'Voltage', 'Avg-Current', 'Current', 'CPU-Usage', 'A53-Temp', 'A53-0-Usage', 'A53-1-Usage', 'A53-2-Usage', 'A53-3-Usage', 'A72-Temp', 'A72-0-Usage', 'A72-1-Usage', 'GPU0-Temp', 'GPU1-Temp', 'GPU-Usage', 'RAM-Usage', 'Ethernet-RX', 'Ethernet-TX', 'WWAN-RX', 'WWAN-TX']
+                    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+                    writer.writerow({'Date': date.today().strftime("%d/%m/%Y"), 'Time': date.now().strftime("%H:%M:%S"), 'Battery-Temp': status['powerInfo']['battery_temp'], 'Voltage': status['powerInfo']['voltage'], 'Avg-Current': status['powerInfo']['avg_current'], 'Current': status['powerInfo']['current'], 'CPU-Usage': status['cpuInfo']['usage'], 'A53-Temp':status['cpuInfo']['temperatures']['A53'], 'A53-0-Usage': status['cpuInfo']['usageDetailed']['A53-0'], 'A53-1-Usage': status['cpuInfo']['usageDetailed']['A53-1'], 'A53-2-Usage': status['cpuInfo']['usageDetailed']['A53-2'], 'A53-3-Usage': status['cpuInfo']['usageDetailed']['A53-3'], 'A72-Temp': status['cpuInfo']['temperatures']['A72'], 'A72-0-Usage': status['cpuInfo']['usageDetailed']['A72-0'], 'A72-1-Usage': status['cpuInfo']['usageDetailed']['A72-1'], 'GPU0-Temp': status['gpuInfo']['temperatures']['GPU0'], 'GPU1-Temp': status['gpuInfo']['temperatures']['GPU0'], 'GPU-Usage': status['gpuInfo']['memoryUsage'], 'RAM-Usage': status['ramInfo']['usage'], 'Ethernet-RX':status['dataInfo']['ethernet']['rx'], 'Ethernet-TX': status['dataInfo']['ethernet']['tx'], 'WWAN-RX': status['dataInfo']['wwan']['rx'], 'WWAN-TX': status['dataInfo']['wwan']['tx']})
+
+        else:
+            with open('/media/mmcblk1p1/devicestats.csv', mode='w') as csv_file:
+                fieldnames = ['Date', 'Time', 'Battery-Temp', 'Voltage', 'Avg-Current', 'Current', 'CPU-Usage', 'A53-Temp', 'A53-0-Usage', 'A53-1-Usage', 'A53-2-Usage', 'A53-3-Usage', 'A72-Temp', 'A72-0-Usage', 'A72-1-Usage', 'GPU0-Temp', 'GPU1-Temp', 'GPU-Usage', 'RAM-Usage', 'Ethernet-RX', 'Ethernet-TX', 'WWAN-RX', 'WWAN-TX']
+                writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+                writer.writeheader()
