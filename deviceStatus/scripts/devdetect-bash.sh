@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # making sure some things are setup
-vnstat -i wwan0 --add
+vnstat -i wwan0 --add > /dev/null 2>&1
 
 # variable names are in caps
 
@@ -10,8 +10,10 @@ function veml7700_detect () {
 
     if [ $CHECK = 10 ]; then
         VEML7700_DETECT="true"
+        printf "VEML7700 Detected\n"
     else
         VEML7700_DETECT="false"
+        printf "VEML7700 Not Detected\n"
     fi
 }
 
@@ -20,18 +22,27 @@ function veml7700_verify () {
         $(/usr/sbin/light/light_intensity test)
         local CHECK=$(cat /tmp/light_intensity | awk '{print $4}')
         if [ -z $CHECK ]; then
-            VEML7700_NOTE="$(echo $?)"
-            VEML7700_VERIFY="cmd_err"
+            VEML7700_NOTE="no_reading"
+            VEML7700_VERIFY="false"
         elif [ $(echo "$CHECK>4000" | bc) = 1 ]; then
-            VEML7700_VERIFY="value_err_hi"
+            VEML7700_NOTE="value_err_hi"
+            VEML7700_VERIFY="false"
         elif [ $(echo "$CHECK<0" | bc) = 1 ]; then
-            VEML7700_VERIFY="value_err_lo"
+            VEML7700_NOTE="value_err_lo"
+            VEML7700_VERIFY="false"
         else
             VEML7700_VERIFY="true"
         fi
+
+        if [ $VEML7700_VERIFY == "true" ]; then
+            printf "VEML7700 Verified\n"
+        else
+            printf "VEML7700 Not Verified\n"
+        fi
     else
-        VEML7700_NOTE="file_err"
+        VEML7700_NOTE="binary_file_err"
         VEML7700_VERIFY="false"
+        printf "VEML7700 Not Verified\n"
     fi
 }
 
@@ -40,8 +51,10 @@ function hts221_detect () {
 
     if [ $CHECK = 5f ]; then
         HTS221_DETECT="true"
+        printf "HTS221 Detected\n"
     else
         HTS221_DETECT="false"
+        printf "HTS221 Not Detected\n"
     fi
 }
 
@@ -53,31 +66,48 @@ function hts221_verify () {
         local CHECK_HUM=$(cat /tmp/met | awk '/Relative Humidity/ {print $4}')
 
         if [ -z "$CHECK_HUM" ]; then
-            HTS221_NOTE="$(echo $?)"
-            HTS221_VERIFY_HUM="cmd_err"
+            HTS221_NOTE="no_reading"
+            HTS221_VERIFY_HUM="false"
         elif [ $(echo "$CHECK_HUM>100" | bc) = 1 ]; then
-            HTS221_VERIFY_HUM="value_err_hi"
+            HTS221_NOTE="value_err_hi"
+            HTS221_VERIFY_HUM="false"
         elif [ $(echo "$CHECK_HUM<0" | bc) = 1 ]; then
-            HTS221_VERIFY_HUM="value_err_lo"
+            HTS221_NOTE="value_err_lo"
+            HTS221_VERIFY_HUM="false" 
         else
             HTS221_VERIFY_HUM="true"
         fi
 
+        if [ $HTS221_VERIFY_HUM == "true" ]; then
+            printf "HTS221 Humidity Verified\n"    
+        else
+            printf "HTS221 Humidity Not Verified\n"
+        fi
+
         if [ -z "$CHECK_TEMP" ]; then
             $(/usr/sbin/weather/hts221)
-            HTS221_NOTE="$(echo $?)"
-            HTS221_VERIFY_TEMP="cmd_err"
+            HTS221_NOTE="no_reading"
+            HTS221_VERIFY_TEMP="false"
         elif [ $(echo "$CHECK_TEMP>120" | bc) = 1 ]; then
-            HTS221_VERIFY_TEMP="value_err_hi"
+            HTS221_NOTE="value_err_hi"
+            HTS221_VERIFY_TEMP="false"
         elif [ $(echo "$CHECK_TEMP<-40" | bc) = 1 ]; then
-            HTS221_VERIFY_TEMP="value_err_lo"
+            HTS221_NOTE="value_err_lo"
+            HTS221_VERIFY_TEMP="false"
         else
             HTS221_VERIFY_TEMP="true"
         fi
+
+        if [ $HTS221_VERIFY_TEMP == "true" ]; then
+            printf "HTS221 Temperature Verified\n"
+        else
+            printf "HTS221 Temperature Not Verified\n"
+        fi
     else
-        HTS221_NOTE="file_err"
+        HTS221_NOTE="binary_file_err"
         HTS221_VERIFY_HUM="false"
         HTS221_VERIFY_TEMP="false"
+        printf "HTS221 Not Verified"
     fi
 }
 
@@ -86,18 +116,22 @@ function camera_detect () {
 
     if [[ -z "$CHECK" ]]; then
         CAM_DETECT="false"
+        printf "Camera Not Detected\n"
     else
         CAM_DETECT="true"
         if [ $CHECK = "mxc-mipi-csi2.1" ]; then
             CAM_MODEL="csi"
+            printf "MIPI CSI Camera Detected\n"
         elif [ $CHECK = "Video" ]; then
             CAM_MODEL="usb"
+            printf "SeeCAM31 camera Detected\n"
         fi
     fi
 }
 
 function camera_verify () {
-    echo "camera verify"
+    printf "Camera Verify Not Implemented\n"
+    CAM_VERIFY="true"
 }
 
 function mmc_detect () {
@@ -105,8 +139,10 @@ function mmc_detect () {
 
     if [ $CHECK = "lo" ]; then
         MMC_DETECT="true"
+        printf "MMC Detected\n"
     else
         MMC_DETECT="false"
+        printf "MMC Not Detected\n"
     fi
 }
 
@@ -118,12 +154,14 @@ function mmc_verify () {
 
     if [[ $RAND_W = $RAND_R ]]; then
         MMC_VERIFY="true"
+        printf "MMC Verified\n"
     else
         MMC_VERIFY="false"
+        printf "MMC Not Verified\n"
     fi
 
-    rm -f /media/mmcblk1p1/random
-    mkdir /media/mmcblk1p1/upload
+    rm -f /media/mmcblk1p1/random > /dev/null 2>&1
+    mkdir /media/mmcblk1p1/upload > /dev/null 2>&1
 }
 
 function modem_detect () {
@@ -132,18 +170,19 @@ function modem_detect () {
     if [ -z "$CHECK" ]; then
         MODEM_DETECT="false"
         MODEM_NOTE="cmd_err"
+        printf "Modem Not Detected\n"
     elif [ $CHECK = "OK" ]; then
         MODEM_DETECT="true"
-    else
-        echo 
+        printf "Modem Detected\n"
     fi
 }
 
 function modem_verify () {
-    mmcli -m 0 > /dev/null
+    mmcli -m 0 > /dev/null 2>&1
     if [ "echo $?" = 1 ]; then
         MODEM_NOTE="cmd_err"
         MODEM_VERIFY="false"
+        printf "Modem Not Verified\n"
     fi
 
     if [ "$MODEM_NOTE" != "cmd_err" ]; then
@@ -155,7 +194,7 @@ function modem_verify () {
 
         #if modem disabled, enable it
         if [[ "$MODEM_DETECT" == "true" && "$MODEM_STATE" == "disabled" ]]; then
-            mmcli -m 0 -e > /dev/null
+            mmcli -m 0 -e > /dev/null 2>&1
         fi
 
         MODEM_STATE=$(mmcli -m 0 | awk -v l1=$L1 -v l2=$L2 'NR == l1,NR == l2 {print $0}' | awk '/state/ {print $0}' | awk 'NR == 1 {print $NF}' | perl -pe 's/\e\[[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]//g;s/\e[PX^_].*?\e\\//g;s/\e\][^\a]*(?:\a|\e\\)//g;s/\e[\[\]A-Z\\^_@]//g;')
@@ -164,14 +203,16 @@ function modem_verify () {
 
         if [[ "$MODEM_STATE" == "failed" ]]; then
             MODEM_VERIFY="false"
+            printf "Modem Not Verified\n"
         else
             MODEM_VERIFY="true"
+            printf "Modem Verified\n"
         fi
     fi
 
-    if [ "$MODEM_STATE" == "failed" ]; then
-        MODEM_VERIFY="false"
-    fi
+    # if [ "$MODEM_STATE" == "failed" ]; then
+    #     MODEM_VERIFY="false"
+    # fi
 }
 
 function battery_guage_detect () {
@@ -179,8 +220,10 @@ function battery_guage_detect () {
 
     if [ $CHECK = 55 ]; then
         BATT_GUAGE_DETECT="true"
+        printf "Battery Guage Detected\n"
     else
         BATT_GUAGE_DETECT="false"
+        printf "Battery Guage Not Detected\n"
     fi
 }
 
@@ -191,9 +234,11 @@ function battery_guage_verify () {
     if [ -z "$CHECK" ]; then
         BATT_GUAGE_VERIFY="false"
         BATT_GUAGE_NOTE="cmd_err"
+        printf "Battery Guage Not Verified\n"
     fi
     if [ $CHECK = 0x0100 ]; then
         BATT_GUAGE_VERIFY="true"
+        printf "Battery Guage Verified\n"
     fi
 }
 
