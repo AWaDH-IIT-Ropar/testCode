@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# making sure some things are setup
+vnstat -i wwan0 --add
+
 # variable names are in caps
 
 function veml7700_detect () {
