@@ -58,7 +58,7 @@
             <div class="cards">
                 <div class="card">
                     <div>
-                        <h1>58%</h1>
+                        <h1>{{data.cpuInfo.usage}}</h1>
                         <span>CPU utilization</span>
                     </div>
                     <div>
@@ -67,16 +67,50 @@
                 </div>
                 <div class="card">
                     <div>
-                        <h1>09%</h1>
-                        <span>Battery</span>    
+                        <h1>{{"%.4f"|format(data.gpuInfo.memoryUsage)}}</h1>
+                        <span>GPU memory usage</span>
                     </div>
                     <div>
-                        <i class="las la-battery-half" style="font-size:4rem;"></i>
+                        <i class="las la-tachometer-alt" style="font-size:4rem;"></i>
                     </div>
                 </div>
                 <div class="card">
                     <div>
-                        <h1>56</h1>
+                        {%for line in data.light_intensity%}
+                        <h1>{{line}}</h1>
+                        {%endfor%}
+                        <span>Light Intensity</span>    
+                    </div>
+                    <div>
+                        <i class="las la-sun" style="font-size:4rem;"></i>
+                    </div>
+                </div>
+                <div class="card">
+                    <div>
+                        <h4>Connectivity : {{data.internet.connectivity}}</h4>
+                        <h4>Signal : {{data.internet.signal}}</h4>
+                        <span>Internet</span>
+                    </div>
+                    <div>
+                        <i class="las la-broadcast-tower" style="font-size:4rem;"></i>
+                    </div>
+                </div>
+                <div class="card">
+                    <div>
+                        <h4>Total : {{data.ramInfo.total}}</h4>
+                        <h4>Usage : {{data.ramInfo.usage}}</h4>
+                        <h4>Free : {{data.ramInfo.free}}</h4>
+                        <span>Ram Info</span>
+                    </div>
+                    <div>
+                        <i class="las la-microchip" style="font-size:4rem;"></i>
+                    </div>
+                </div>
+                <div class="card">
+                    <div>
+                        {%for line in data.temperature%}
+                        <h4>{{line}}</h4>
+                        {%endfor%}
                         <span>Temperature</span>    
                     </div>
                     <div>
@@ -85,8 +119,24 @@
                 </div>
                 <div class="card">
                     <div>
-                        <h1>578mb</h1>
-                        <span>Data consumption</span>    
+                        {%for line in data.battery_parameters%}
+                        <h5>{{line}}</h5>
+                        {%endfor%}
+                        <span>Battery</span>    
+                    </div>
+                    <div>
+                        <i class="las la-battery-half" style="font-size:4rem;"></i>
+                    </div>
+                </div>
+                <div class="card">
+                    <div>
+                        <h4>Board-serial : {{data.generalInfo.board_serial}}</h4>
+                        <h4>Board-type : {{data.generalInfo.board_type}}</h4>
+                        <h4>Board-revision : {{data.generalInfo.board_revision}}</h4>
+                        <span>Device Info</span>    
+                    </div>
+                    <div>
+                        <i class="las la-info-circle" style="font-size: 4rem;"></i>
                     </div>
                 </div>
             </div>
@@ -94,10 +144,10 @@
             <!-- ----- bottom container for streaming and dev data -->
             <div class="info-container">
                 <div class="cam">
-                    Peripheral data
+                    Logs
                 </div>
                 <div class="device-info">
-                    Deice data
+                    Other data
                 </div>
             </div>
 

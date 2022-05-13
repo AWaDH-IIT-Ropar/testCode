@@ -8,6 +8,28 @@ app = Flask(__name__)
 app.config['SECRET_KEY']="asdadvadfsdfs"      #random secret key
 app.config['ENV']='development'
 
+def readData():
+    path="deviceStats.json"   #here define the path where the file is located, from which the data is to be read
+    data=None
+    with open(path ,'r') as file:
+        data=json.load(file)
+
+    path="/home/attu/Downloads/"  #path for the bhagwat bhaiya's file
+    data['temperature']=None
+    with open(path+'met' ,'r') as file:
+        data['temperature']=file.readlines()
+
+    data['battery_parameters']=None
+    with open(path+'battery_parameters' ,'r') as file:
+        data['battery_parameters']=file.readlines()
+
+    data['light_intensity']=None
+    with open(path+'light_intensity' ,'r') as file:
+        data['light_intensity']=file.readlines()[0].split(":")[1:]
+
+    return data
+
+
 @app.route('/',methods=["GET","POST"])
 def login():
     if 'username' in session:
@@ -58,7 +80,7 @@ def video():
 @app.route('/dashboard')
 def dashboard():
     if 'username' in session:
-        return render_template('Dashboard.html')
+        return render_template('Dashboard.html',data=readData())
     return redirect(url_for('login'))
 
 @app.route('/logout')
