@@ -202,7 +202,7 @@ if __name__ == '__main__':
             status = get_allinfo()
             # write to file every 10 seconds
             if (((date.now().second)%10) == 0):
-                with open(f"/var/tmp/devicestats", 'w') as file:
+                with open("/var/tmp/devicestats", 'w') as file:
                     json.dump(status, file, indent=4, separators=(',', ':'))
             
             # write to file every 60 seconds
