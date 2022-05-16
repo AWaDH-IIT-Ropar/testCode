@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # making sure some things are setup
-vnstat -i wwan0 --add > /dev/null 2>&1
+vnstat -i wwan0 --add 
+systemctl restart vnstat.service
+
+systemctl mask wpa_supplicant.service
 
 # variable names are in caps
 
