@@ -178,7 +178,7 @@ while true; do
             \"avg_current\":$BATT_AVG_CURRENT,
             \"current\":$BATT_CURRENT
         }
-    }" > /var/tmp/devicestats
+    }" > /tmp/devicestats
 
     if [ -f "/media/mmcblk1p1/devicestats-bash.csv" ]; then
         echo "$(date +%Y-%m-%d,%I:%M:%S),$BATT_TEMP,$BATT_VOLTAGE,$BATT_AVG_CURRENT,$BATT_CURRENT,$CPU_USAGE,$CORE_A53_TEMP,$CPU_USAGE_A53_0,$CPU_USAGE_A53_1,$CPU_USAGE_A53_2,$CPU_USAGE_A53_3,$CORE_A72_TEMP,$CPU_USAGE_A72_0,$CPU_USAGE_A72_1,$GPU_0_TEMP,$GPU_1_TEMP,$GPU_USAGE,$RAM_USAGE,$DATA_ETH0_RX,$DATA_ETH0_TX,$DATA_WWAN0_RX,$DATA_WWAN0_TX" >> /media/mmcblk1p1/devicestats.csv

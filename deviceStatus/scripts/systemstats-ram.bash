@@ -83,19 +83,19 @@ function get_data () {
 
 function get_power () {
     printf "Power info\n"
-    if [ -f "/var/tmp/battery_parameters" ]; then
-        BATT_TEMP=$(cat /var/tmp/battery_parameters | awk 'NR == 1 {print $3}')
+    if [ -f "/tmp/battery_parameters" ]; then
+        BATT_TEMP=$(cat /tmp/battery_parameters | awk 'NR == 1 {print $3}')
     
-        local TMP=$(echo "$(cat /var/tmp/battery_parameters | awk 'NR == 2 {print $3}') / 1000" | bc -l) # temporary variable
+        local TMP=$(echo "$(cat /tmp/battery_parameters | awk 'NR == 2 {print $3}') / 1000" | bc -l) # temporary variable
         BATT_VOLTAGE=$(printf %.3f $TMP)
 
-        local TMP=$(echo "$(cat /var/tmp/battery_parameters | awk 'NR == 3 {print $4}') / 1000" | bc -l) # temporary variable
+        local TMP=$(echo "$(cat /tmp/battery_parameters | awk 'NR == 3 {print $4}') / 1000" | bc -l) # temporary variable
         BATT_AVG_CURRENT=$(printf %.3f $TMP)
 
-        local TMP=$(echo "$(cat /var/tmp/battery_parameters | awk 'NR == 4 {print $3}') / 1000" | bc -l) # temporary variable
+        local TMP=$(echo "$(cat /tmp/battery_parameters | awk 'NR == 4 {print $3}') / 1000" | bc -l) # temporary variable
         BATT_CURRENT=$(printf %.3f $TMP)
     else
-        printf "/var/tmp/battery_parameters not found\n"
+        printf "/tmp/battery_parameters not found\n"
         BATT_TEMP=-1
         BATT_VOLTAGE=-1
         BATT_AVG_CURRENT=-1
@@ -105,18 +105,18 @@ function get_power () {
 
 function get_weather () {
     printf "Weather info\n"
-    if [ -f "/var/tmp/light_intensity" ]; then
-        W_LUX=$(cat /var/tmp/light_intensity | awk -F':' '{print $2}')
+    if [ -f "/tmp/light_intensity" ]; then
+        W_LUX=$(cat /tmp/light_intensity | awk -F':' '{print $2}')
     else
-        printf "/var/tmp/light_intensity not found"
+        printf "/tmp/light_intensity not found"
         W_LUX=-1
     fi
 
-    if [ -f "/var/tmp/met" ]; then
+    if [ -f "/tmp/met" ]; then
         W_TEMPERATURE=$(cat /tmp/met | awk -F':' 'NR == 2 {print $2}')
         W_HUMIDITY=$(cat /tmp/met | awk -F':' 'NR == 1 {print $2}')
     else
-        printf "/var/tmp/met not found"
+        printf "/tmp/met not found"
         W_TEMPERATURE=-1
         W_HUMIDITY=-1
     fi
@@ -187,7 +187,7 @@ while true; do
             \"avg_current\":$BATT_AVG_CURRENT,
             \"current\":$BATT_CURRENT
         }
-    }" > /var/tmp/devicestats-bash
+    }" > /tmp/devicestats-bash
 
     sleep 10
 done

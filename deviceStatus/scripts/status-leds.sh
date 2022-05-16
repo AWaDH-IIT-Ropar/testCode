@@ -4,7 +4,7 @@ RED=0
 GREEN=2
 BLUE=1
 
-FILE=/var/tmp/somefile
+FILE=/tmp/somefile
 
 function get_val () {
     VAL=$(cat $FILE | python3 -c "import sys, json; print(json.load(sys.stdin)$1)")

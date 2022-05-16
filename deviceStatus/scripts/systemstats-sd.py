@@ -8,7 +8,7 @@ import json
 import time
 import logging
 
-logging.basicConfig(filename='/var/tmp/entomologist-systeminfo.log', level=logging.DEBUG, format='[%(asctime)s] : %(message)s')
+logging.basicConfig(filename='/tmp/entomologist-systeminfo.log', level=logging.DEBUG, format='[%(asctime)s] : %(message)s')
 
 deviceInfo = deviceInfo.DeviceInfo()
 
@@ -150,26 +150,26 @@ def power_info():
             "current": -1
         }
 
-    if(exists("/var/tmp/battery_parameters")):
-        temp = subprocess.run("cat /var/tmp/battery_parameters | awk 'NR == 1 {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+    if(exists("/tmp/battery_parameters")):
+        temp = subprocess.run("cat /tmp/battery_parameters | awk 'NR == 1 {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
         if temp != "":
             temp = float(temp)
         else:
             temp = float(-1)
 
-        voltage = subprocess.run("cat /var/tmp/battery_parameters | awk 'NR == 2 {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+        voltage = subprocess.run("cat /tmp/battery_parameters | awk 'NR == 2 {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
         if voltage != "":
             voltage = float(voltage)/1000
         else:
             voltage = float(-1)
 
-        avg_current = subprocess.run("cat /var/tmp/battery_parameters | awk 'NR == 3 {print $4}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+        avg_current = subprocess.run("cat /tmp/battery_parameters | awk 'NR == 3 {print $4}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
         if avg_current != "":
             avg_current = float(avg_current)/1000
         else:
             avg_current = float(-1)
 
-        current = subprocess.run("cat /var/tmp/battery_parameters | awk 'NR == 4 {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+        current = subprocess.run("cat /tmp/battery_parameters | awk 'NR == 4 {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
         if current != "":
             current = float(current)/1000
         else:
