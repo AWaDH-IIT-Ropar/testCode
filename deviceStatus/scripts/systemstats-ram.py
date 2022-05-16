@@ -1,3 +1,4 @@
+import time
 import urllib.request
 import deviceInfo
 from datetime import datetime as date
@@ -116,8 +117,8 @@ def data_usage_info():
         ret['ethernet']['rx'] = float("{:.3f}".format(dataj["interfaces"][0]["traffic"]["total"]["rx"]/(1024*1024)))
         ret['ethernet']['tx'] = float("{:.3f}".format(dataj["interfaces"][0]["traffic"]["total"]["tx"]/(1024*1024)))
     except:
-        ret['ethernet']['rx'] = 0
-        ret['ethernet']['tx'] = 0
+        ret['ethernet']['rx'] = -1
+        ret['ethernet']['tx'] = -1
 
     data = subprocess.run("vnstat -i wwan0 --json y", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
 
@@ -126,33 +127,33 @@ def data_usage_info():
         ret['wwan']['rx'] = float("{:.3f}".format(dataj["interfaces"][0]["traffic"]["total"]["rx"]/(1024*1024)))
         ret['wwan']['tx'] = float("{:.3f}".format(dataj["interfaces"][0]["traffic"]["total"]["tx"]/(1024*1024)))
     except:
-        ret['wwan']['rx'] = 0
-        ret['wwan']['tx'] = 0
+        ret['wwan']['rx'] = -1
+        ret['wwan']['tx'] = -1
 
     return ret
 
 def power_info():
     ret = {
-            "battery_temp": 0,
-            "voltage": 0,
-            "avg_current": 0,
-            "current": 0
+            "battery_temp": -1,
+            "voltage": -1,
+            "avg_current": -1,
+            "current": -1
         }
 
     if(exists("/tmp/battery_parameters")):
-        temp = subprocess.run("cat /tmp/battery_parameters | awk '/Temperature/ {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+        temp = subprocess.run("cat /tmp/battery_parameters | awk 'NR == 1 {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
         if temp != "":
             temp = float(temp)
         else:
             temp = float(-1)
 
-        voltage = subprocess.run("cat /tmp/battery_parameters | awk '/Voltage/ {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+        voltage = subprocess.run("cat /tmp/battery_parameters | awk 'NR == 2 {print $3}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
         if voltage != "":
             voltage = float(voltage)/1000
         else:
             voltage = float(-1)
 
-        avg_current = subprocess.run("cat /tmp/battery_parameters | awk '/Average Current/ {print $4}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
+        avg_current = subprocess.run("cat /tmp/battery_parameters | awk 'NR == 3 {print $4}'", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout.rstrip('\n')
         if avg_current != "":
             avg_current = float(avg_current)/1000
         else:
@@ -198,22 +199,9 @@ def get_allinfo():
 if __name__ == '__main__':
 
     while True:
-        if (exists("/media/mmcblk1p1/devicestats.csv")):
-            status = get_allinfo()
-            # write to file every 10 seconds
-            if (((date.now().second)%10) == 0):
-                with open("/var/tmp/devicestats", 'w') as file:
-                    json.dump(status, file, indent=4, separators=(',', ':'))
+        status = get_allinfo()
+        # write to file every 10 seconds
+        with open("/var/tmp/devicestats", 'w') as file:
+            json.dump(status, file, indent=4, separators=(',', ':'))
+        time.sleep(10)
             
-            # write to file every 60 seconds
-            if (((date.now().second)%60) == 0):
-                with open('/media/mmcblk1p1/devicestats.csv', mode='a') as csv_file:
-                    fieldnames = ['Date', 'Time', 'Battery-Temp', 'Voltage', 'Avg-Current', 'Current', 'CPU-Usage', 'A53-Temp', 'A53-0-Usage', 'A53-1-Usage', 'A53-2-Usage', 'A53-3-Usage', 'A72-Temp', 'A72-0-Usage', 'A72-1-Usage', 'GPU0-Temp', 'GPU1-Temp', 'GPU-Usage', 'RAM-Usage', 'Ethernet-RX', 'Ethernet-TX', 'WWAN-RX', 'WWAN-TX']
-                    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-                    writer.writerow({'Date': date.today().strftime("%d/%m/%Y"), 'Time': date.now().strftime("%H:%M:%S"), 'Battery-Temp': status['powerInfo']['battery_temp'], 'Voltage': status['powerInfo']['voltage'], 'Avg-Current': status['powerInfo']['avg_current'], 'Current': status['powerInfo']['current'], 'CPU-Usage': status['cpuInfo']['usage'], 'A53-Temp':status['cpuInfo']['temperatures']['A53'], 'A53-0-Usage': status['cpuInfo']['usageDetailed']['A53-0'], 'A53-1-Usage': status['cpuInfo']['usageDetailed']['A53-1'], 'A53-2-Usage': status['cpuInfo']['usageDetailed']['A53-2'], 'A53-3-Usage': status['cpuInfo']['usageDetailed']['A53-3'], 'A72-Temp': status['cpuInfo']['temperatures']['A72'], 'A72-0-Usage': status['cpuInfo']['usageDetailed']['A72-0'], 'A72-1-Usage': status['cpuInfo']['usageDetailed']['A72-1'], 'GPU0-Temp': status['gpuInfo']['temperatures']['GPU0'], 'GPU1-Temp': status['gpuInfo']['temperatures']['GPU0'], 'GPU-Usage': status['gpuInfo']['memoryUsage'], 'RAM-Usage': status['ramInfo']['usage'], 'Ethernet-RX':status['dataInfo']['ethernet']['rx'], 'Ethernet-TX': status['dataInfo']['ethernet']['tx'], 'WWAN-RX': status['dataInfo']['wwan']['rx'], 'WWAN-TX': status['dataInfo']['wwan']['tx']})
-
-        else:
-            with open('/media/mmcblk1p1/devicestats.csv', mode='w') as csv_file:
-                fieldnames = ['Date', 'Time', 'Battery-Temp', 'Voltage', 'Avg-Current', 'Current', 'CPU-Usage', 'A53-Temp', 'A53-0-Usage', 'A53-1-Usage', 'A53-2-Usage', 'A53-3-Usage', 'A72-Temp', 'A72-0-Usage', 'A72-1-Usage', 'GPU0-Temp', 'GPU1-Temp', 'GPU-Usage', 'RAM-Usage', 'Ethernet-RX', 'Ethernet-TX', 'WWAN-RX', 'WWAN-TX']
-                writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-                writer.writeheader()
