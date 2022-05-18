@@ -176,7 +176,7 @@ while true; do
     get_cpu "_A72_1"
 
     echo "{
-        \"time\":\"$(date +"%Y-%m-%dT%I:%M:%S")\",
+        \"time\":\"$(date +"%Y-%m-%dT%H:%M:%S")\",
         \"cpuInfo\":{
             \"temperatures\":{
                 \"A53\":$CORE_A53_TEMP,

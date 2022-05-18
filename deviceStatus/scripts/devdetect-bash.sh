@@ -302,4 +302,42 @@ else
 fi
 
 
-echo "{\"veml7700\":{\"detect\":\"$VEML7700_DETECT\",\"verify\":\"$VEML7700_VERIFY\",\"note\":\"$VEML7700_NOTE\"},\"hts221\":{\"detect\":\"$HTS221_DETECT\",\"verify\":{\"temp\":\"$HTS221_VERIFY_TEMP\",\"humidity\":\"$HTS221_VERIFY_HUM\"},\"note\":\"$HTS221_NOTE\"},\"battery_ic\":{\"detect\":\"$BATT_GUAGE_DETECT\",\"verify\":\"$BATT_GUAGE_VERIFY\",\"note\":\"$BATT_GUAGE_NOTE\"},\"mmc\":{\"detect\":\"$MMC_DETECT\",\"verify\":\"$MMC_VERIFY\",\"note\":\"$MMC_NOTE\"},\"camera\":{\"detect\":\"$CAM_DETECT\",\"model\":\"$CAM_MODEL\",\"verify\":\"$CAM_VERIFY\",\"note\":\"$CAM_NOTE\"},\"modem\":{\"detect\":\"$MODEM_DETECT\",\"verify\":\"$MODEM_VERIFY\",\"state\":\"$MODEM_STATE\",\"failed_reason\":\"$MODEM_FAILED_REASON\",\"signal\":\"$MODEM_SIGNAL\",\"note\":\"$MODEM_NOTE\"}}" > /tmp/somefile
+echo "{
+    \"veml7700\":{
+        \"detect\":\"$VEML7700_DETECT\",
+        \"verify\":\"$VEML7700_VERIFY\",
+        \"note\":\"$VEML7700_NOTE\"
+    },
+    \"hts221\":{
+        \"detect\":\"$HTS221_DETECT\",
+        \"verify\":{
+            \"temp\":\"$HTS221_VERIFY_TEMP\",
+            \"humidity\":\"$HTS221_VERIFY_HUM\"
+        },
+        \"note\":\"$HTS221_NOTE\"
+    },
+    \"battery_ic\":{
+        \"detect\":\"$BATT_GUAGE_DETECT\",
+        \"verify\":\"$BATT_GUAGE_VERIFY\",
+        \"note\":\"$BATT_GUAGE_NOTE\"
+    },
+    \"mmc\":{
+        \"detect\":\"$MMC_DETECT\",
+        \"verify\":\"$MMC_VERIFY\",
+        \"note\":\"$MMC_NOTE\"
+    },
+    \"camera\":{
+        \"detect\":\"$CAM_DETECT\",
+        \"model\":\"$CAM_MODEL\",
+        \"verify\":\"$CAM_VERIFY\",
+        \"note\":\"$CAM_NOTE\"
+    },
+    \"modem\":{
+        \"detect\":\"$MODEM_DETECT\",
+        \"verify\":\"$MODEM_VERIFY\",
+        \"state\":\"$MODEM_STATE\",
+        \"failed_reason\":\"$MODEM_FAILED_REASON\",
+        \"signal\":\"$MODEM_SIGNAL\",
+        \"note\":\"$MODEM_NOTE\"
+    }
+}" > /tmp/somefile
