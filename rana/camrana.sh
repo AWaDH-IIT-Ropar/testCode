@@ -11,11 +11,11 @@ stamp() {
 while :
 do
     var=`stamp`
-    ffmpeg -f v4l2 -framerate 60 -video_size 1280x720 -i /dev/video0 -frames 1000 -q:v 1 -b 2000k -f MJPEG pipe:1 | ./ranacore64 -c ranacore.conf | ffmpeg -i - -q:v 1 -b 2000k -vcodec copy ${var}.avi -y
+    ffmpeg -f v4l2 -framerate 60 -video_size 1280x720 -i /dev/video0 -t 00:00:10 -q:v 1 -b 2000k -f MJPEG pipe:1 | ./ranacore64 -c ranacore.conf | ffmpeg -i - -q:v 1 -b 2000k -vcodec copy ${var}.avi -y
     sleep 5
 done
 
-
+#-frames 1000
 #ffmpeg -f v4l2 -framerate 60 -video_size 1280x720 -i /dev/video0 -frames 1000 -q:v 1 -b 2000k -f MJPEG pipe:1 | ./ranacore64 -c ranacore.conf | ffmpeg -i - -q:v 1 -vcodec copy ranatest.avi
 
 #ffmpeg -f v4l2 -framerate 60 -video_size 1280x720 -i /dev/video0 -frames 1000 -q:v 1 -b 2000k test.avi
