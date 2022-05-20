@@ -88,13 +88,13 @@ write_to_file () {
             \"time\":\"$(date +"%Y-%m-%dT%H:%M:%S")\",
             \"gps_state\":\"$GPS_STATE\",
             \"location\":{
-                \"status\":\"$LOC\",
-                \"latitude\":\"$LAT\",
-                \"longitude\":\"$LONG\",
-                \"altitude\":\"$ALT\",
-                \"satellites\":\"$NSAT\"
+                    \"status\":\"$LOC\",
+                    \"latitude\":\"$LAT\",
+                    \"longitude\":\"$LONG\",
+                    \"altitude\":\"$ALT\",
+                    \"satellites\":\"$NSAT\"
             }
-        }" > $GPSFILE
+    }" > $GPSFILE
 }
 
 if [ -f $DEVFILE ]; then
