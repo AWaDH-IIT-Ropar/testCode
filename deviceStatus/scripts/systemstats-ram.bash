@@ -89,19 +89,19 @@ function get_data () {
 function get_power () {
     printf "Power info\n"
     if [ -f "${BATTFILE}" ]; then
-        if [ $(wc -l ${BATTFILE} | awk 'NR == 1 {print $1}') -eq 4 ]; then
-            BATT_TEMP=$(cat ${BATTFILE} | awk 'NR == 1 {print $3}')
+        if [ $(wc -l ${BATTFILE} | awk 'NR == 1 {print $1}') -eq 5 ]; then
+            BATT_TEMP=$(cat ${BATTFILE} | awk -F':' 'NR == 3 {print $2}' | tr -d '",')
         
-            local TMP=$(echo "$(cat ${BATTFILE} | awk 'NR == 2 {print $3}') / 1000" | bc -l) # temporary variable
+            local TMP=$(echo "$(cat ${BATTFILE} | awk -F':' 'NR == 2 {print $2}' | tr -d '",') / 1000" | bc -l) # temporary variable
             BATT_VOLTAGE=$(printf %.3f $TMP)
 
-            local TMP=$(echo "$(cat ${BATTFILE} | awk 'NR == 3 {print $4}') / 1000" | bc -l) # temporary variable
-            BATT_AVG_CURRENT=$(printf %.3f $TMP)
+            # local TMP=$(echo "$(cat ${BATTFILE} | awk 'NR == 3 {print $4}') / 1000" | bc -l) # temporary variable
+            # BATT_AVG_CURRENT=$(printf %.3f $TMP)
 
-            local TMP=$(echo "$(cat ${BATTFILE} | awk 'NR == 4 {print $3}') / 1000" | bc -l) # temporary variable
+            local TMP=$(echo "$(cat ${BATTFILE} | awk -F':' 'NR == 4 {print $2}' | tr -d '",') / 1000" | bc -l) # temporary variable
             BATT_CURRENT=$(printf %.3f $TMP)
         else
-            printf "${BATTFILE} lines not equal to 4\n"
+            printf "${BATTFILE} lines not equal to 5\n"
             BATT_TEMP=-1
             BATT_VOLTAGE=-1
             BATT_AVG_CURRENT=-1
@@ -238,7 +238,6 @@ while true; do
         \"powerInfo\":{
             \"battery_temp\":$BATT_TEMP,
             \"voltage\":$BATT_VOLTAGE,
-            \"avg_current\":$BATT_AVG_CURRENT,
             \"current\":$BATT_CURRENT
         },
         \"weather\":{

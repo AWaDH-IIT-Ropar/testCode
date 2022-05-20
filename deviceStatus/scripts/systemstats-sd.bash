@@ -100,19 +100,19 @@ function get_data () {
 function get_power () {
     printf "Power info\n"
     if [ -f "${BATTFILE}" ]; then
-        if [ $(wc -l ${BATTFILE} | awk 'NR == 1 {print $1}') -eq 4 ]; then
-            BATT_TEMP=$(cat ${BATTFILE} | awk 'NR == 1 {print $3}')
+         if [ $(wc -l ${BATTFILE} | awk 'NR == 1 {print $1}') -eq 5 ]; then
+            BATT_TEMP=$(cat ${BATTFILE} | awk -F':' 'NR == 3 {print $2}' | tr -d '",')
         
-            local TMP=$(echo "$(cat ${BATTFILE} | awk 'NR == 2 {print $3}') / 1000" | bc -l) # temporary variable
+            local TMP=$(echo "$(cat ${BATTFILE} | awk -F':' 'NR == 2 {print $2}' | tr -d '",') / 1000" | bc -l) # temporary variable
             BATT_VOLTAGE=$(printf %.3f $TMP)
 
-            local TMP=$(echo "$(cat ${BATTFILE} | awk 'NR == 3 {print $4}') / 1000" | bc -l) # temporary variable
-            BATT_AVG_CURRENT=$(printf %.3f $TMP)
+            # local TMP=$(echo "$(cat ${BATTFILE} | awk 'NR == 3 {print $4}') / 1000" | bc -l) # temporary variable
+            # BATT_AVG_CURRENT=$(printf %.3f $TMP)
 
-            local TMP=$(echo "$(cat ${BATTFILE} | awk 'NR == 4 {print $3}') / 1000" | bc -l) # temporary variable
+            local TMP=$(echo "$(cat ${BATTFILE} | awk -F':' 'NR == 4 {print $2}' | tr -d '",') / 1000" | bc -l) # temporary variable
             BATT_CURRENT=$(printf %.3f $TMP)
         else
-            printf "${BATTFILE} lines not equal to 4\n"
+            printf "${BATTFILE} lines not equal to 5\n"
             BATT_TEMP=-1
             BATT_VOLTAGE=-1
             BATT_AVG_CURRENT=-1
@@ -200,8 +200,8 @@ while true; do
     get_cpu "_A72_1"
 
     if [ -f ${OUTFILE} ]; then
-        echo "$(date +%Y-%m-%d,%H:%M:%S),$BATT_TEMP,$BATT_VOLTAGE,$BATT_AVG_CURRENT,$BATT_CURRENT,$CPU_USAGE,$CORE_A53_TEMP,$CPU_USAGE_A53_0,$CPU_USAGE_A53_1,$CPU_USAGE_A53_2,$CPU_USAGE_A53_3,$CORE_A72_TEMP,$CPU_USAGE_A72_0,$CPU_USAGE_A72_1,$GPU_0_TEMP,$GPU_1_TEMP,$GPU_USAGE,$RAM_USAGE,$DATA_ETH0_RX,$DATA_ETH0_TX,$DATA_WWAN0_RX,$DATA_WWAN0_TX" >> ${OUTFILE}
+        echo "$(date +%Y-%m-%d,%H:%M:%S),$BATT_TEMP,$BATT_VOLTAGE,$BATT_CURRENT,$CPU_USAGE,$CORE_A53_TEMP,$CPU_USAGE_A53_0,$CPU_USAGE_A53_1,$CPU_USAGE_A53_2,$CPU_USAGE_A53_3,$CORE_A72_TEMP,$CPU_USAGE_A72_0,$CPU_USAGE_A72_1,$GPU_0_TEMP,$GPU_1_TEMP,$GPU_USAGE,$RAM_USAGE,$DATA_ETH0_RX,$DATA_ETH0_TX,$DATA_WWAN0_RX,$DATA_WWAN0_TX" >> ${OUTFILE}
     else
-        echo "Date,Time,Batt-temp,Voltage,Avg-current,Current,CPU-usage,A53-temp,A53-0-usage,A53-1-usage,A53-2-usage,A53-3-usage,A72-temp,A72-0-usage,A72-1-usage,GPU0-temp,GPU1-temp,GPU-usage,RAM-usage,Ethernet-RX,Ethernet-TX,WWAN-RX,WWAN-TX" >> ${OUTFILE}
+        echo "Date,Time,Batt-temp,Voltage,Current,CPU-usage,A53-temp,A53-0-usage,A53-1-usage,A53-2-usage,A53-3-usage,A72-temp,A72-0-usage,A72-1-usage,GPU0-temp,GPU1-temp,GPU-usage,RAM-usage,Ethernet-RX,Ethernet-TX,WWAN-RX,WWAN-TX" >> ${OUTFILE}
     fi
 done
