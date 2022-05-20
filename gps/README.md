@@ -6,18 +6,8 @@
 * Runs only on boot, exits on acquiring gps signal
 * The output is in json format at
 > /tmp/gps
-  
-### Execution
-* Save the file in the required directory
-* Give permission to execute with 
-```
-$ chmod 777 gps.sh
-```
-* Execute as
-```
-$ ./gps.sh
-```
 
+```
 ### Output
 * The script outputs data in json
 ```
