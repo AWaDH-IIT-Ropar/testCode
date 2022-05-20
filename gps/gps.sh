@@ -1,6 +1,8 @@
 #! /bin/sh
+
 DEVFILE="/tmp/somefile"
 GPSFILE="/tmp/gps"
+UPDATE_DURATION="120m"
 
 get_loc () {
     printf "location func\n"
@@ -58,21 +60,33 @@ close_gps () {
 }
 
 write_to_file () {
+    # echo "{
+    #         \"time\":\"$(date +"%Y-%m-%dT%H:%M:%S")\",
+    #         \"gps_state\":\"$GPS_STATE\",
+    #         \"config_info\":{
+    #             \"config\":\"$CFG\",
+    #             \"config_note\":\"$CFG_NOTE\"
+    #         },
+    #         \"open_info\":{
+    #             \"enable\":\"$EN\",
+    #             \"enable_note\":\"$EN_NOT\"
+    #         },
+    #         \"close_info\":{
+    #             \"disable\":\"$DIS\",
+    #             \"disable_note\":\"$DIS_NOTE\"
+    #         },
+    #         \"location\":{
+    #             \"status\":\"$LOC\",
+    #             \"latitude\":\"$LAT\",
+    #             \"longitude\":\"$LONG\",
+    #             \"altitude\":\"$ALT\",
+    #             \"satellites\":\"$NSAT\"
+    #         }
+    #     }" > $GPSFILE
+
     echo "{
             \"time\":\"$(date +"%Y-%m-%dT%H:%M:%S")\",
             \"gps_state\":\"$GPS_STATE\",
-            \"config_info\":{
-                \"config\":\"$CFG\",
-                \"config_note\":\"$CFG_NOTE\"
-            },
-            \"open_info\":{
-                \"enable\":\"$EN\",
-                \"enable_note\":\"$EN_NOT\"
-            },
-            \"close_info\":{
-                \"disable\":\"$DIS\",
-                \"disable_note\":\"$DIS_NOTE\"
-            },
             \"location\":{
                 \"status\":\"$LOC\",
                 \"latitude\":\"$LAT\",
@@ -86,26 +100,30 @@ write_to_file () {
 if [ -f $DEVFILE ]; then
     MODEM=$(cat $DEVFILE | python3 -c "import sys, json; print(json.load(sys.stdin)['modem']['detect'])")
     if [ $MODEM = "true" ]; then
-        setup_gps
-        get_loc
-
-        write_to_file
-    
-        while [ $LOC = "516" ]; do
-            printf "getting loc again\n"
-            write_to_file
+        while true; do
+            setup_gps
             get_loc
-            sleep 2
+
+            write_to_file
+    
+            while [[ $LOC = "516" || -z "$LOC" ]]; do
+                printf "getting loc again\n"
+                write_to_file
+                get_loc
+                sleep 2
+            done
+
+            close_gps
+            write_to_file
+            sleep ${UPDATE_DURATION}
         done
-
-        close_gps
-
-        write_to_file
     else 
         printf "modem not detected\n"
         GPS_STATE="modem_not_found"
         write_to_file
+        exit 1
     fi 
 else
     printf "$DEVFILE not found\n"
+
 fi

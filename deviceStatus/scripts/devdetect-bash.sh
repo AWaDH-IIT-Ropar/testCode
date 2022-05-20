@@ -1,5 +1,9 @@
 #!/bin/bash
 
+OUTFILE="/tmp/devdetect"
+LUXFILE="/tmp/light_intensity"
+WEATHERFILE="/tmp/met"
+
 # making sure some things are setup
 vnstat -i wwan0 --add 
 systemctl restart vnstat.service
@@ -23,7 +27,7 @@ function veml7700_detect () {
 function veml7700_verify () {
     if [ -f "/usr/sbin/light/light_intensity" ]; then
         $(/usr/sbin/light/light_intensity test)
-        local CHECK=$(cat /tmp/light_intensity | awk '{print $4}')
+        local CHECK=$(cat ${LUXFILE} | awk -F':' 'NR == 2 {print $2}' | tr -d '",')
         if [ -z $CHECK ]; then
             VEML7700_NOTE="no_reading"
             VEML7700_VERIFY="false"
@@ -65,8 +69,8 @@ function hts221_verify () {
     
     if [ -f "/usr/sbin/met/TH_reading" ]; then
         $(/usr/sbin/met/TH_reading test)
-        local CHECK_TEMP=$(cat /tmp/met | awk '/Temperature in C/ {print $4}')
-        local CHECK_HUM=$(cat /tmp/met | awk '/Relative Humidity/ {print $4}')
+        local CHECK_TEMP=$(cat ${WEATHERFILE} | awk -F':' 'NR == 3 {print $2}' | tr -d '",')
+        local CHECK_HUM=$(cat ${WEATHERFILE} | awk -F':' 'NR == 2 {print $2}' | tr -d '",')
 
         if [ -z "$CHECK_HUM" ]; then
             HTS221_NOTE="no_reading"
@@ -162,6 +166,9 @@ function mmc_verify () {
         MMC_VERIFY="false"
         printf "MMC Not Verified\n"
     fi
+
+    MMC_NOTE=$(df -h /media/mmcblk1p1 | awk 'NR == 2 {print $5}' | tr -d '%')
+
 
     rm -f /media/mmcblk1p1/random > /dev/null 2>&1
     mkdir /media/mmcblk1p1/upload > /dev/null 2>&1
@@ -340,4 +347,4 @@ echo "{
         \"signal\":\"$MODEM_SIGNAL\",
         \"note\":\"$MODEM_NOTE\"
     }
-}" > /tmp/somefile
+}" > ${OUTFILE}

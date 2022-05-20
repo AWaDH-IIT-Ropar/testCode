@@ -24,18 +24,6 @@ $ ./gps.sh
 {
     "time":"2022-05-18T12:19:33",
     "gps_state":"gps_disabled",
-    "config_info":{
-        "config":"OK",
-        "config_note":"configured"
-    },
-    "open_info":{
-        "enable":"504",
-        "enable_note":""
-    },
-    "close_info":{
-        "disable":"OK",
-        "disable_note":""
-    },
     "location":{
         "status":"OK",
         "latitude":"3058.1217N",

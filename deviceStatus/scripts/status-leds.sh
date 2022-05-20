@@ -4,10 +4,10 @@ RED=0
 GREEN=2
 BLUE=1
 
-FILE=/tmp/somefile
+INFILE="/tmp/devdetect"
 
 function get_val () {
-    VAL=$(cat $FILE | python3 -c "import sys, json; print(json.load(sys.stdin)$1)")
+    VAL=$(cat $INFILE | python3 -c "import sys, json; print(json.load(sys.stdin)$1)")
 }
 
 function blink () {
@@ -64,7 +64,7 @@ blink "1" "BLUE"
 
 while true; do
 
-    if [ -f "$FILE" ]; then
+    if [ -f "$INFILE" ]; then
         # echo "hts221 detect and verify"
         get_val "['hts221']['detect']"
         HTS221_D=$VAL
@@ -176,5 +176,6 @@ while true; do
         sleep 5
     else
         blink "3" "BLUE"
+        printf "${INFILE} not found"
     fi
 done

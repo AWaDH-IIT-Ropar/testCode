@@ -1,0 +1,12 @@
+[Unit]
+Description=System stats to SD service
+After=devdetect.service
+Requires=devdetect.service
+
+[Service]
+Type=Simple
+ExecStart=/bin/sh /usr/sbin/systemstats-sd/systemstats-sd.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

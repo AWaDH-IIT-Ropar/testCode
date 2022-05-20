@@ -1,0 +1,12 @@
+[Unit]
+Description=GPS service
+After=devdetect.service
+Requires=devdetect.service
+
+[Service]
+Type=Simple
+ExecStart=/bin/sh /usr/sbin/gps/gps.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

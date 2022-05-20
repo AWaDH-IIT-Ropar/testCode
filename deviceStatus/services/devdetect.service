@@ -1,12 +1,9 @@
 [Unit]
-Description=Device detection Service
+Description=Device detection by bash
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/python3 -u /home/root/ws/sensors.py
-RemainAfterExit=no
+ExecStart=/home/root/ws/sensors-bash.sh
+RemainAfterExit=yes
 RestartSec=5
 Restart=on-failure
-
-[Install]
-# WantedBy=multi-user.target

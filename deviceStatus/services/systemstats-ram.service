@@ -1,0 +1,12 @@
+[Unit]
+Description=System stats to RAM service
+After=devdetect.service
+Requires=devdetect.service
+
+[Service]
+Type=Simple
+ExecStart=/bin/sh /usr/sbin/systemstats-ram/systemstats-ram.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,5 +1,10 @@
 #!/bin/sh
 
+OUTFILE="/media/mmcblk1p1/devicestats.csv"
+BATTFILE="/tmp/battery_parameters"
+LUXFILE="/tmp/light_intensity"
+WEATHERFILE="/tmp/met"
+
 function general_info () {
     # reading board serial number and deleting any null character in it
     BRD_SERIAL_NUM=$(tr -d '\0' </sys/firmware/devicetree/base/serial-number)
@@ -94,19 +99,27 @@ function get_data () {
 
 function get_power () {
     printf "Power info\n"
-    if [ -f "/tmp/battery_parameters" ]; then
-        BATT_TEMP=$(cat /tmp/battery_parameters | awk 'NR == 1 {print $3}')
-    
-        local TMP=$(echo "$(cat /tmp/battery_parameters | awk 'NR == 2 {print $3}') / 1000" | bc -l) # temporary variable
-        BATT_VOLTAGE=$(printf %.3f $TMP)
+    if [ -f "${BATTFILE}" ]; then
+        if [ $(wc -l ${BATTFILE} | awk 'NR == 1 {print $1}') -eq 4 ]; then
+            BATT_TEMP=$(cat ${BATTFILE} | awk 'NR == 1 {print $3}')
+        
+            local TMP=$(echo "$(cat ${BATTFILE} | awk 'NR == 2 {print $3}') / 1000" | bc -l) # temporary variable
+            BATT_VOLTAGE=$(printf %.3f $TMP)
 
-        local TMP=$(echo "$(cat /tmp/battery_parameters | awk 'NR == 3 {print $4}') / 1000" | bc -l) # temporary variable
-        BATT_AVG_CURRENT=$(printf %.3f $TMP)
+            local TMP=$(echo "$(cat ${BATTFILE} | awk 'NR == 3 {print $4}') / 1000" | bc -l) # temporary variable
+            BATT_AVG_CURRENT=$(printf %.3f $TMP)
 
-        local TMP=$(echo "$(cat /tmp/battery_parameters | awk 'NR == 4 {print $3}') / 1000" | bc -l) # temporary variable
-        BATT_CURRENT=$(printf %.3f $TMP)
+            local TMP=$(echo "$(cat ${BATTFILE} | awk 'NR == 4 {print $3}') / 1000" | bc -l) # temporary variable
+            BATT_CURRENT=$(printf %.3f $TMP)
+        else
+            printf "${BATTFILE} lines not equal to 4\n"
+            BATT_TEMP=-1
+            BATT_VOLTAGE=-1
+            BATT_AVG_CURRENT=-1
+            BATT_CURRENT=-1
+        fi
     else
-        printf "/tmp/battery_parameters not found\n"
+        printf "${BATTFILE} not found\n"
         BATT_TEMP=-1
         BATT_VOLTAGE=-1
         BATT_AVG_CURRENT=-1
@@ -117,18 +130,18 @@ function get_power () {
 function get_weather () {
     printf "Weather info\n"
 
-    if [ -f "/tmp/light_intensity" ]; then
-        W_LUX=$(cat /tmp/light_intensity | awk -F':' '{print $2}')
+    if [ -f "${LUXFILE}" ]; then
+        W_LUX=$(cat ${LUXFILE} | awk -F':' '{print $2}')
     else
-        printf "/tmp/light_intensity not found"
+        printf "${LUXFILE} not found"
         W_LUX=-1
     fi
 
-    if [ -f "/tmp/met" ]; then
-        W_TEMPERATURE=$(cat /tmp/met | awk -F':' 'NR == 2 {print $2}')
-        W_HUMIDITY=$(cat /tmp/met | awk -F':' 'NR == 1 {print $2}')
+    if [ -f "${WEATHERFILE}" ]; then
+        W_TEMPERATURE=$(cat ${WEATHERFILE} | awk -F':' 'NR == 2 {print $2}')
+        W_HUMIDITY=$(cat ${WEATHERFILE} | awk -F':' 'NR == 1 {print $2}')
     else
-        printf "/tmp/met not found"
+        printf "${WEATHERFILE} not found"
         W_TEMPERATURE=-1
         W_HUMIDITY=-1
     fi
@@ -186,9 +199,9 @@ while true; do
     get_cpu "_A72_0"
     get_cpu "_A72_1"
 
-    if [ -f "/media/mmcblk1p1/devicestats-bash.csv" ]; then
-        echo "$(date +%Y-%m-%d,%H:%M:%S),$BATT_TEMP,$BATT_VOLTAGE,$BATT_AVG_CURRENT,$BATT_CURRENT,$CPU_USAGE,$CORE_A53_TEMP,$CPU_USAGE_A53_0,$CPU_USAGE_A53_1,$CPU_USAGE_A53_2,$CPU_USAGE_A53_3,$CORE_A72_TEMP,$CPU_USAGE_A72_0,$CPU_USAGE_A72_1,$GPU_0_TEMP,$GPU_1_TEMP,$GPU_USAGE,$RAM_USAGE,$DATA_ETH0_RX,$DATA_ETH0_TX,$DATA_WWAN0_RX,$DATA_WWAN0_TX" >> /media/mmcblk1p1/devicestats-bash.csv
+    if [ -f ${OUTFILE} ]; then
+        echo "$(date +%Y-%m-%d,%H:%M:%S),$BATT_TEMP,$BATT_VOLTAGE,$BATT_AVG_CURRENT,$BATT_CURRENT,$CPU_USAGE,$CORE_A53_TEMP,$CPU_USAGE_A53_0,$CPU_USAGE_A53_1,$CPU_USAGE_A53_2,$CPU_USAGE_A53_3,$CORE_A72_TEMP,$CPU_USAGE_A72_0,$CPU_USAGE_A72_1,$GPU_0_TEMP,$GPU_1_TEMP,$GPU_USAGE,$RAM_USAGE,$DATA_ETH0_RX,$DATA_ETH0_TX,$DATA_WWAN0_RX,$DATA_WWAN0_TX" >> ${OUTFILE}
     else
-        echo "Date,Time,Batt-temp,Voltage,Avg-current,Current,CPU-usage,A53-temp,A53-0-usage,A53-1-usage,A53-2-usage,A53-3-usage,A72-temp,A72-0-usage,A72-1-usage,GPU0-temp,GPU1-temp,GPU-usage,RAM-usage,Ethernet-RX,Ethernet-TX,WWAN-RX,WWAN-TX" >> /media/mmcblk1p1/devicestats-bash.csv
+        echo "Date,Time,Batt-temp,Voltage,Avg-current,Current,CPU-usage,A53-temp,A53-0-usage,A53-1-usage,A53-2-usage,A53-3-usage,A72-temp,A72-0-usage,A72-1-usage,GPU0-temp,GPU1-temp,GPU-usage,RAM-usage,Ethernet-RX,Ethernet-TX,WWAN-RX,WWAN-TX" >> ${OUTFILE}
     fi
 done
