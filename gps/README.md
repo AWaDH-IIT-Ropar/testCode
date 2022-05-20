@@ -6,20 +6,10 @@
 * Runs only on boot, exits on acquiring gps signal
 * The output is in json format at
 > /tmp/gps
-  
-### Execution
-* Save the file in the required directory
-* Give permission to execute with 
-```
-$ chmod 777 gps.sh
-```
-* Execute as
-```
-$ ./gps.sh
-```
 
 ### Output
 * The script outputs data in json
+
 ```
 {
     "time":"2022-05-18T12:19:33",
@@ -30,7 +20,6 @@ $ ./gps.sh
         "longitude":"07628.4258E",
         "altitude":"255.0",
         "satellites":"05"
-    }
+        }
 }
-
 ```

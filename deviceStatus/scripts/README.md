@@ -2,24 +2,12 @@
 
 ### Overview
 * The status of detection and stored in json format in a file
-> /var/tmp/somefile
-  
-### Execution
-* Save the file in the required directory
-* Give permission to execute with 
-```
-$ chmod 777 devdetect-bash.sh
-```
-* Execute as
-```
-$ ./devdetect-bash.sh
-```
+> /tmp/devdetect
 
 ### Output
 * The script outputs data in json
 ```
 {
-
     "veml7700":{
         "detect":"true",
         "verify":"true",
@@ -41,12 +29,12 @@ $ ./devdetect-bash.sh
     "mmc":{
         "detect":"true",
         "verify":"true",
-        "note":""
+        "note":"1"
     },
     "camera":{
         "detect":"true",
         "model":"usb",
-        "verify":"",
+        "verify":"true",
         "note":""
     },
     "modem":{
@@ -57,93 +45,90 @@ $ ./devdetect-bash.sh
         "signal":"0%",
         "note":""
     }
-
 }
 ```
 * The possible values for keys are
   1. detect: "true", "false"
   2. verify: "true", "false". NOTE hts221 has temp and humidity keys in verify
-  3. note: some description if any error occurred
+  3. note: some description if any error occurred, in case of MMC, gives the current space used in percentage
   4. model: "usb", "csi"
   5. state: modem state
   6. failed_reason: modem failed reason
   7. signal: modem signal in percentage eg. "30 %"
 
-## systemstats.py (System stats)
+## systemstats-ram.bash (System stats to RAM)
 
 ### Overview
 * This script outputs a json object every 10s to 
-> /var/tmp/devicestats
-* The outputs are
-  1. time in ISO format
-  2. cpu information
-  3. gpu information
-  4. ram information
-  5. general board information
-  6. internet connectivity
-  
-### Requirements
-  1. psutil (python module)
-  2. deviceinfo.py (present in the same directory of repo)
-  
-### Execution
-* Save the file in the required directory
-* Execute as
-```
-$ python3 /the/directory/of/file/systemstats.py
-```
+> /tmp/devicestats
 
 ### Ouput
 The script outputs data in json as
 ```
 {
-    "time":"2022-05-10T15:32:43.842498",
-    "cpuInfo":{
-        "temperatures":{
-            "A53":50.3,
-            "A72":51.3
+        "time":"2022-05-20T11:10:02",
+        "cpuInfo":{
+            "temperatures":{
+                "A53":57.70,
+                "A72":58.10
+            },
+            "usage":9.249,
+            "usageDetailed":{
+                "A53-0":16.290,
+                "A53-1":10.029,
+                "A53-2":16.290,
+                "A53-3":7.178,
+                "A72-0":2.956,
+                "A72-1":2.846
+            }
         },
-        "usage":2.8,
-        "usageDetailed":{
-            "A53-0":1.1,
-            "A53-1":7.5,
-            "A53-2":1.0,
-            "A53-3":0.8,
-            "A72-0":6.1,
-            "A72-1":0.6
+        "gpuInfo":{
+            "cores":2,
+            "temperatures":{
+                "GPU0":58.10,
+                "GPU1":57.70
+            },
+            "memoryUsage":0.008
+        },
+        "ramInfo":{
+            "total":3.626,
+            "usage":19.167,
+            "free":2.939
+        },
+        "generalInfo":{
+            "board-serial":06981200,
+        },
+        "internet":{
+            "connectivity":true,
+            "signal":0
+        },
+        "dataInfo":{
+            "ethernet":{
+                "rx":1958.245,
+                "tx":558.313
+            },
+            "wwan":{
+                "rx":0.000,
+                "tx":0.000
+            }
+        },
+        "powerInfo":{
+            "battery_temp":-1,
+            "voltage":-1,
+            "avg_current":-1,
+            "current":-1
+        },
+        "weather":{
+            "lux":188.58,
+            "temperature":24.99 ,
+            "humidity":56.66 
         }
-    },
-    "gpuInfo":{
-        "cores":2,
-        "temperatures":{
-            "GPU0":51.3,
-            "GPU1":51.3
-        },
-        "memoryUsage":0.007635354995727539
-    },
-    "ramInfo":{
-        "total":3.626,
-        "usage":16.5,
-        "free":3.0146
-    },
-    "generalInfo":{
-        "board-serial":6981200,
-        "board-type":"0037",
-        "board-revision":"V1.1C"
-    },
-    "internet":{
-        "connectivity":"False",
-        "signal":"0"
-    },
-    "dataInfo":{
-        "rx":383.34935092926025,
-        "tx":61.435561180114746
-    },
-    "powerInfo":{
-        "battery_temp":25.55,
-        "voltage":12.453,
-        "avg_current":0.452,
-        "current":0.004
     }
-}
 ```
+
+## systemstats-sd.bash (System stats to SD card)
+
+### Overview
+* This script outputs in csv format every 60s to 
+> /media/mmcblk1p1/devicestats.csv
+
