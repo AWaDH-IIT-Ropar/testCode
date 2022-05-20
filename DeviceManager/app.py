@@ -27,6 +27,10 @@ def readData():
     with open(path+'light_intensity' ,'r') as file:
         data['light_intensity']=file.readlines()[0].split(":")[1:]
 
+    data['gps']=None
+    with open("gps.json" ,'r') as file:  #please here define the path of gps file
+        data['gps']=json.load(file)
+
     return data
 
 

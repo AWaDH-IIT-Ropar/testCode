@@ -108,6 +108,17 @@
                 </div>
                 <div class="card">
                     <div>
+                        <h4>Latitude : {{data.gps.location.latitude}}</h4>
+                        <h4>Longitude : {{data.gps.location.longitude}}</h4>
+                        <h4>Altitude : {{data.gps.location.altitude}}</h4>
+                        <span>GPS Info</span>
+                    </div>
+                    <div>
+                        <i class="las la-compass" style="font-size:4rem;"></i>
+                    </div>
+                </div>
+                <div class="card">
+                    <div>
                         {%for line in data.temperature%}
                         <h4>{{line}}</h4>
                         {%endfor%}
