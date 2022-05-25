@@ -96,7 +96,7 @@ The script outputs data in json as
             "free":2.939
         },
         "generalInfo":{
-            "board-serial":06981200,
+            "board-serial":"06981200"
         },
         "internet":{
             "connectivity":true,

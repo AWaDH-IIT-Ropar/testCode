@@ -219,7 +219,7 @@ while true; do
             \"free\":$RAM_FREE
         },
         \"generalInfo\":{
-            \"board-serial\":$BRD_SERIAL_NUM,
+            \"board_serial\":\"$BRD_SERIAL_NUM\"
         },
         \"internet\":{
             \"connectivity\":$NETWORK_CONNECTED,
