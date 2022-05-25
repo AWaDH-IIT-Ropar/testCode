@@ -12,14 +12,14 @@
 
 ```
 {
-    "time":"2022-05-18T12:19:33",
-    "gps_state":"gps_disabled",
-    "location":{
-        "status":"OK",
-        "latitude":"3058.1217N",
-        "longitude":"07628.4258E",
-        "altitude":"255.0",
-        "satellites":"05"
+        "time":"2022-05-18T12:19:33",
+        "gps_state":"gps_disabled",
+        "location":{
+                "status":"OK",
+                "latitude":"3058.1217N",
+                "longitude":"07628.4258E",
+                "altitude":"255.0",
+                "satellites":"05"
         }
 }
 ```
