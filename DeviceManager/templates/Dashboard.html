@@ -28,8 +28,8 @@
                     </a>
                 </li>
                 <li> 
-                    <a href="#">
-                        <i class="las la-chart-line"></i><span>Metrics</span>
+                    <a href="{{url_for('files')}}">
+                        <i class="las la-file-download"></i><span>Download Files</span>
                     </a>
                 </li>
             </ul>
@@ -76,9 +76,7 @@
                 </div>
                 <div class="card">
                     <div>
-                        {%for line in data.light_intensity%}
-                        <h1>{{line}}</h1>
-                        {%endfor%}
+                        <h1>{{data.light_intensity.Light_Intensity}} Lux</h1>
                         <span>Light Intensity</span>    
                     </div>
                     <div>
@@ -119,9 +117,9 @@
                 </div>
                 <div class="card">
                     <div>
-                        {%for line in data.temperature%}
-                        <h4>{{line}}</h4>
-                        {%endfor%}
+                        <h4>Relative_humidity: {{data.temperature.Relative_humidity}}</h4>
+                        <h4>Temperature(C): {{data.temperature.Temperature_c}}</h4>
+                        <h4>Relative_humidity(F): {{data.temperature.Temperature_f}}</h4>
                         <span>Temperature</span>    
                     </div>
                     <div>
@@ -130,9 +128,9 @@
                 </div>
                 <div class="card">
                     <div>
-                        {%for line in data.battery_parameters%}
-                        <h5>{{line}}</h5>
-                        {%endfor%}
+                        <h4>Voltage: {{data.battery_parameters.Voltage}}</h4>
+                        <h4>Internal_temp(C): {{data.battery_parameters.Internal_temperature}}</h4>
+                        <h4>Average_current: {{data.battery_parameters.Average_current}}</h4>
                         <span>Battery</span>    
                     </div>
                     <div>

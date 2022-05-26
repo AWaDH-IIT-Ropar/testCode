@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Entomologist</title>
     <link rel="stylesheet" href="{{url_for('static',filename='icons/css/line-awesome.min.css')}}">
-    <link rel="stylesheet" href="{{url_for('static',filename='css/videoFeed.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/files.css')}}">
 </head>
 <body>
     <input type="checkbox" id="nav-toggle">
@@ -23,13 +23,13 @@
                     </a>
                 </li>
                 <li> 
-                    <a href="#" class="active">
+                    <a href="{{url_for('video')}}">
                         <i class="las la-video"></i><span>Stream Cam</span>
                     </a>
                 </li>
                 <li> 
-                    <a href="{{url_for('files')}}">
-                        <i class="las la-chart-line"></i><span>Download Files</span>
+                    <a href="#" class="active">
+                        <i class="las la-file-download"></i><span>Download Files</span>
                     </a>
                 </li>
             </ul>
@@ -42,7 +42,7 @@
         <header>
             <h1>
                 <label for="nav-toggle"><i class="las la-bars"></i></label>
-                Video Streaming
+                Download Files
             </h1>
             <h1 id="nameDisplay">Hi, Pratyush</h1>
             <div>
@@ -53,12 +53,12 @@
 
         <!-- Main section -->
         <main>
-            <div style="width:100%; padding:0 0 10px 0;text-align:center;">
-                Please restart the device after closing the device manager.
-            </div>
             <div class="video-feed-container">
-                <div class="cam">
-                    <img src="{{url_for('videoFeed')}}" width="100%" height="100%" alt="">
+                <div class="file-list">
+                    {%for file in files%}
+                    <a href="/files/{{file}}"><p>{{file}}</p></a>
+                    <hr>
+                    {%endfor%}
                 </div>
             </div>
 

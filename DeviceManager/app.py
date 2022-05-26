@@ -1,8 +1,10 @@
 from crypt import methods
 import json
-from flask import Flask, render_template, Response, redirect, request, session, url_for
+from multiprocessing import dummy
+from flask import Flask, render_template, Response, redirect, request, session, url_for, abort, send_file
 import cv2
 import time
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY']="asdadvadfsdfs"      #random secret key
@@ -17,15 +19,15 @@ def readData():
     path="/home/attu/Downloads/"  #path for the bhagwat bhaiya's file
     data['temperature']=None
     with open(path+'met' ,'r') as file:
-        data['temperature']=file.readlines()
+        data['temperature']=json.load(file)
 
     data['battery_parameters']=None
     with open(path+'battery_parameters' ,'r') as file:
-        data['battery_parameters']=file.readlines()
+        data['battery_parameters']=json.load(file)
 
     data['light_intensity']=None
     with open(path+'light_intensity' ,'r') as file:
-        data['light_intensity']=file.readlines()[0].split(":")[1:]
+        data['light_intensity']=json.load(file)
 
     data['gps']=None
     with open("gps.json" ,'r') as file:  #please here define the path of gps file
@@ -84,7 +86,18 @@ def video():
 @app.route('/dashboard')
 def dashboard():
     if 'username' in session:
-        return render_template('Dashboard.html',data=readData())
+        dummyData={
+            "cpuInfo":{"usage":5.6},
+            "gpuInfo":{"memoryUsage":2.3},
+            "light_intensity":{"Light_Intensity":6.6},
+            "internet":{"connectivity":True,"signal":2.3},
+            "ramInfo":{"total":4,"usage":3,"free":1},
+            "gps":{"location":{"longitude":1,"latitude":2,"altitude":3}},
+            "temperature":{"Relative_humidity":32,"Temperature_c":21,"Temperature_f":37},
+            "battery_parameters":{"Voltage":2.5,"Internal_temperature":38,"Average_current":2.7},
+            "generalInfo":{"board_serial":34534,"board_type":"NRF","board_revision":2.3}
+        }
+        return render_template('Dashboard.html',data=dummyData)#readData())
     return redirect(url_for('login'))
 
 @app.route('/logout')
@@ -92,6 +105,21 @@ def logout():
     if 'username' in session:
         session.pop('username')
     return redirect(url_for('login'))
+
+@app.route('/files')
+def files():
+    path="/home/attu/Downloads"  #path for the directory's of file
+    if not os.path.exists(path):
+        return abort(404)
+
+    files = os.listdir(path)
+    return render_template('files.html',files=files)
+
+@app.route('/files/<path:filename>', methods=['GET', 'POST'])
+def download(filename):
+    dir="/home/attu/Downloads/"+filename  #path for the directory's of file
+    # Returning file from appended path
+    return send_file(dir)
 
 if __name__ == '__main__':
     app.run(debug=True)
