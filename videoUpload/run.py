@@ -5,6 +5,8 @@ import datetime as dt
 import subprocess
 import random
 import json
+import sys
+import socket
 import ast
 import time
 import os
@@ -14,6 +16,55 @@ from pub import start_publish
 from imageUpload import image_upload_manager
 from verification import start_verification
 import logging as log
+
+# Systemd notifier class
+if sys.version_info < (3,):
+    def _b(x):
+        return x
+else:
+    import codecs
+    def _b(x):
+        return codecs.latin_1_encode(x)[0]
+
+class SystemdNotifier:
+    """This class holds a connection to the systemd notification socket
+    and can be used to send messages to systemd using its notify method."""
+
+    def __init__(self, debug=False):
+        """Instantiate a new notifier object. This will initiate a connection
+        to the systemd notification socket.
+        Normally this method silently ignores exceptions (for example, if the
+        systemd notification socket is not available) to allow applications to
+        function on non-systemd based systems. However, setting debug=True will
+        cause this method to raise any exceptions generated to the caller, to
+        aid in debugging.
+        """
+        self.debug = debug
+        try:
+            self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+            addr = os.getenv('NOTIFY_SOCKET')
+            if addr[0] == '@':
+                addr = '\0' + addr[1:]
+            self.socket.connect(addr)
+        except Exception:
+            self.socket = None
+            if self.debug:
+                raise
+
+    def notify(self, state):
+        """Send a notification to systemd. state is a string; see
+        the man page of sd_notify (http://www.freedesktop.org/software/systemd/man/sd_notify.html)
+        for a description of the allowable values.
+        Normally this method silently ignores exceptions (for example, if the
+        systemd notification socket is not available) to allow applications to
+        function on non-systemd based systems. However, setting debug=True will
+        cause this method to raise any exceptions generated to the caller, to
+        aid in debugging."""
+        try:
+            self.socket.sendall(_b(state))
+        except Exception:
+            if self.debug:
+                raise
 
 # AWS Setup
 log.basicConfig(filename='/var/tmp/cloud.log', filemode='w', level=log.INFO, format='[%(asctime)s]- %(message)s', datefmt='%d-%m-%Y %I:%M:%S %p')
@@ -52,7 +103,7 @@ VERIFICATION_TOPIC = f'cameraDevice/fileUploaded/{DEVICE_SERIAL_ID}'
 
 # Buffer Storage Path
 
-BUFFER_IMAGES_PATH = '/media/mmcblk1p1/'
+BUFFER_IMAGES_PATH = '/media/mmcblk1p1/upload/'
 
 
 def generate_payload(filesList):
@@ -144,10 +195,12 @@ def upload_manager(filesList):
 
 def main():
 	log.info("Cloud Main started..")
+	n = SystemdNotifier()
 	while True:
 		if provisionstatus=="True":
 			while len(os.listdir(BUFFER_IMAGES_PATH)):
 				filesList = os.listdir(BUFFER_IMAGES_PATH)[:10]
+				n.notify("WATCHDOG=1")
 				log.info("Calling upload manager..")
 				upload_manager(filesList)
 				log.info("Upload manager successfully executed..")

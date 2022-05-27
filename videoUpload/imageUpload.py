@@ -8,7 +8,7 @@ import ast
 import time
 import multiprocessing
 
-BUFFER_IMAGES_PATH = '/media/mmcblk1p1/'
+BUFFER_IMAGES_PATH = '/media/mmcblk1p1/upload/'
 
 
 def upload_file(filename, response):
