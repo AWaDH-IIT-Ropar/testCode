@@ -83,7 +83,7 @@ rootCA = '/etc/entomologist/cert/AmazonRootCA1.pem'
 cert = '/etc/entomologist/cert/certificate.pem.crt'
 privateKey = '/etc/entomologist/cert/private.pem.key'
 
-BUCKET_NAME = "test-entomoligist"
+BUCKET_NAME = "test-entomologist-2"
 
 # Publish Details
 
