@@ -31,6 +31,7 @@ def on_message(client, userdata, message):
 	uploaded += 1
 	
 	if uploaded == batchSize:
+		uploaded = 0
 		client.disconnect()
 		
 
