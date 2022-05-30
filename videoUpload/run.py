@@ -103,7 +103,7 @@ VERIFICATION_TOPIC = f'cameraDevice/fileUploaded/{DEVICE_SERIAL_ID}'
 
 # Buffer Storage Path
 
-BUFFER_IMAGES_PATH = '/media/mmcblk1p1/upload/'
+BUFFER_IMAGES_PATH = data["device"]["STORAGE_PATH"]
 
 
 def generate_payload(filesList):
