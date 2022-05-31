@@ -1,6 +1,6 @@
 #! /bin/sh
 
-DEVFILE="/tmp/somefile"
+DEVFILE="/tmp/devdetect"
 GPSFILE="/tmp/gps"
 UPDATE_DURATION="120m"
 
@@ -108,6 +108,7 @@ if [ -f $DEVFILE ]; then
     
             while [[ $LOC = "516" || -z "$LOC" ]]; do
                 printf "getting loc again\n"
+                LOC=516
                 write_to_file
                 get_loc
                 sleep 2
