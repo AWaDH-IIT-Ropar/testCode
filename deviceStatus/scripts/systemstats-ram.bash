@@ -61,9 +61,11 @@ function get_ram () {
 function get_connectivity () {
     printf "Internet info\n"
     # check internet connectivity
-    wget -q --spider http://google.com 
+#     wget -q --spider http://google.com 
 
-    if [ $? -eq 0 ]; then 
+#     if [ $? -eq 0 ]; then 
+    local TMP=$(cat /tmp/netstatus)
+    if [ TMP = "connected" ]; then
         NETWORK_CONNECTED="true"
     else
         NETWORK_CONNECTED="false"
