@@ -65,7 +65,7 @@ function get_connectivity () {
 
 #     if [ $? -eq 0 ]; then 
     local TMP=$(cat /tmp/netstatus)
-    if [ TMP = "connected" ]; then
+    if [ $TMP = "connected" ]; then
         NETWORK_CONNECTED="true"
     else
         NETWORK_CONNECTED="false"
