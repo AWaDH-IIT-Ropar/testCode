@@ -12,26 +12,34 @@ app.config['ENV']='development'
 
 def readData():
     path="deviceStats.json"   #here define the path where the file is located, from which the data is to be read
-    data=None
-    with open(path ,'r') as file:
-        data=json.load(file)
+    data={}
+    try:
+        with open(path ,'r') as file:
+            data=json.load(file)
 
-    path="/home/attu/Downloads/"  #path for the bhagwat bhaiya's file
-    data['temperature']=None
-    with open(path+'met' ,'r') as file:
-        data['temperature']=json.load(file)
+        path="/home/attu/Downloads/"  #path for the bhagwat bhaiya's file
+        data['temperature']=None
+        with open(path+'met' ,'r') as file:
+            data['temperature']=json.load(file)
 
-    data['battery_parameters']=None
-    with open(path+'battery_parameters' ,'r') as file:
-        data['battery_parameters']=json.load(file)
+        data['battery_parameters']=None
+        with open(path+'battery_parameters' ,'r') as file:
+            data['battery_parameters']=json.load(file)
 
-    data['light_intensity']=None
-    with open(path+'light_intensity' ,'r') as file:
-        data['light_intensity']=json.load(file)
+        data['light_intensity']=None
+        with open(path+'light_intensity' ,'r') as file:
+            data['light_intensity']=json.load(file)
 
-    data['gps']=None
-    with open("gps.json" ,'r') as file:  #please here define the path of gps file
-        data['gps']=json.load(file)
+        data['gps']=None
+        with open("gps.json" ,'r') as file:  #please here define the path of gps file
+            data['gps']=json.load(file)
+    
+    except FileNotFoundError:
+        data={"error":"File not found"}
+    except json.decoder.JSONDecodeError:
+        data={"error":"File is passed instead of json file"}
+    else:
+        data={"error":"Some error has been occured"}
 
     return data
 
@@ -97,7 +105,7 @@ def dashboard():
             "battery_parameters":{"Voltage":2.5,"Internal_temperature":38,"Average_current":2.7},
             "generalInfo":{"board_serial":34534,"board_type":"NRF","board_revision":2.3}
         }
-        return render_template('Dashboard.html',data=dummyData)#readData())
+        return render_template('Dashboard.html',data=dummyData)
     return redirect(url_for('login'))
 
 @app.route('/logout')
@@ -120,6 +128,24 @@ def download(filename):
     dir="/home/attu/Downloads/"+filename  #path for the directory's of file
     # Returning file from appended path
     return send_file(dir)
+
+@app.route('/configurations')
+def configurations():
+    return render_template('configurations.html')
+
+@app.route('/configurations/file', methods=['GET', 'POST'])
+def downloadConfFile():
+    dir="/home/attu/Downloads/met"  #defing the path for conf file
+    # Returning file from appended path
+    return send_file(dir)
+
+@app.route('/uploader', methods = ['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        f = request.files['file']
+        f.save(f.filename)  #path where the file has to be saved
+        return 'file uploaded successfully'
+    return 'Something went wrong'
 
 if __name__ == '__main__':
     app.run(debug=True)

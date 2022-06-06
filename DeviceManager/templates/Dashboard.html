@@ -32,6 +32,11 @@
                         <i class="las la-file-download"></i><span>Download Files</span>
                     </a>
                 </li>
+                <li> 
+                    <a href="{{url_for('configurations')}}">
+                        <i class="las la-cog"></i><span>Configurations</span>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
@@ -55,6 +60,13 @@
         <!-- Main section -->
         <main>
             <!-- ---upper segment for cards -->
+            {%if 'error' in data%}
+            <div class="cards">
+                <div class="card">
+                    <h1>{{data.error}}</h1>
+                </div>
+            </div>
+            {%else%}
             <div class="cards">
                 <div class="card">
                     <div>
@@ -149,6 +161,7 @@
                     </div>
                 </div>
             </div>
+            {%endif%}
 
             <!-- ----- bottom container for streaming and dev data -->
             <div class="info-container">
