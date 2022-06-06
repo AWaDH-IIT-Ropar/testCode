@@ -1,5 +1,7 @@
 #!/bin/bash
 
+systemd-notify --ready
+
 stamp() {
     TEXT=`jq '.device.SERIAL_ID' ento.conf` 
     DATE=`date +%d-%m-%Y` 
@@ -11,7 +13,8 @@ stamp() {
 while :
 do
     var=`stamp`
-    ffmpeg -f v4l2 -framerate 60 -video_size 1280x720 -i /dev/video0 -t 00:00:10 -q:v 2 -f MJPEG pipe:1 | ./ranacore -c ranacore.conf | ffmpeg -i - -q:v 2 -vcodec copy ${var}.avi
+    ffmpeg -f v4l2 -framerate 60 -r 60 -video_size 640x480 -i /dev/video0 -t 00:00:30 -q:v 8 -f MJPEG pipe:1 | ./ranacore -c ranacore.conf | ffmpeg -i - -q:v 2 -vcodec copy ${var}.avi
+    systemd-notify WATCHDOG=1
     sleep 5
 done
 
