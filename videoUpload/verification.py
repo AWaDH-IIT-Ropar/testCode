@@ -10,7 +10,7 @@ import multiprocessing
 
 with open(f"/etc/entomologist/ento.conf",'r') as file:
 	data=json.load(file)
-BUFFER_IMAGES_PATH = '/media/mmcblk1p1/upload/'
+BUFFER_IMAGES_PATH = data["device"]["STORAGE_PATH"]
 
 uploaded = 0
 batchSize = 0 
