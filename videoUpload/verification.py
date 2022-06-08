@@ -8,6 +8,8 @@ import ast
 import time
 import multiprocessing
 
+with open(f"/etc/entomologist/ento.conf",'r') as file:
+	data=json.load(file)
 BUFFER_IMAGES_PATH = '/media/mmcblk1p1/upload/'
 
 uploaded = 0
