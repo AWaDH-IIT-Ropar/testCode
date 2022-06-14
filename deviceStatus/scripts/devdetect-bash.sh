@@ -301,7 +301,15 @@ else
 fi
 
 # battery guage ic
-battery_guage_detect
+COUNTER=4
+while [ "$COUNTER" -gt 0 ]; do
+    battery_guage_detect
+    let COUNTER=COUNTER-1
+    if [ "$BATT_GUAGE_DETECT" == "true" ]; then
+        break
+    fi
+done
+    
 if [ "$BATT_GUAGE_DETECT" == "true" ]; then
     battery_guage_verify
 else
