@@ -70,7 +70,7 @@ write_to_file () {
                     \"latitude\":\"$LAT\",
                     \"longitude\":\"$LONG\",
                     \"altitude\":\"$ALT\",
-                    \"satellites\":"00"
+                    \"satellites\":\"00\"
             }
     }" > $GPSFILE
 }
