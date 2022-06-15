@@ -2,7 +2,7 @@
 
 DEVFILE="/tmp/devdetect"
 GPSFILE="/tmp/gps"
-UPDATE_DURATION="120m"
+UPDATE_DURATION="15m"
 
 get_loc () {
     printf "location func\n"
@@ -92,7 +92,7 @@ if [ -f $DEVFILE ]; then
                 LOC=516
                 write_to_file
                 get_loc
-                sleep 2
+                sleep 5
             done
 
             close_gps
