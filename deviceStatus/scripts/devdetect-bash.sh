@@ -308,6 +308,7 @@ while [ "$COUNTER" -gt 0 ]; do
     if [ "$BATT_GUAGE_DETECT" == "true" ]; then
         break
     fi
+    sleep 2
 done
     
 if [ "$BATT_GUAGE_DETECT" == "true" ]; then
