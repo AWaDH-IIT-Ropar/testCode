@@ -14,7 +14,8 @@ Description=RANA Application
 ExecStart=/usr/sbin/rana/rana.sh
 StandardOutput=file:/var/tmp/rana.log
 StandardError=inherit
-Watchdogsec=150s
+#Watchdogsec=150s
+WatchdogSec=150s
 # Automatically restart the service if it crashes
 Restart=on-failure
 
