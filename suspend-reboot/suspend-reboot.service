@@ -1,0 +1,10 @@
+[Unit]
+Description=Reboot after suspend
+
+[Service]
+Type=simple
+ExecStart=/bin/sh /usr/sbin/suspend-reboot/suspend-reboot.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
