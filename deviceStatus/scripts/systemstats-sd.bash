@@ -7,11 +7,14 @@ BATTFILE="/tmp/battery_parameters"
 LUXFILE="/tmp/light_intensity"
 WEATHERFILE="/tmp/met"
 SERIAL_ID=`jq '.device.SERIAL_ID' /etc/entomologist/ento.conf`
+
+# general info about board
 function general_info () {
     # reading board serial number and deleting any null character in it
     BRD_SERIAL_NUM=$(tr -d '\0' </sys/firmware/devicetree/base/serial-number)
 } # done
 
+# get cpu usage stats
 function get_cpu () {
     # CORE_A53_TEMP=$(echo "scale=2 ; $(cat /sys/class/thermal/thermal_zone0/temp) / 1000" | bc -l)
     # CORE_A72_TEMP=$(echo "scale=2 ; $(cat /sys/class/thermal/thermal_zone1/temp) / 1000" | bc -l)
@@ -29,9 +32,11 @@ function get_cpu () {
     # CPU_USAGE=$TMP
 
     printf "Cpu info\n"
+    
+    # get temperature of cores
     CORE_A53_TEMP=$(echo "scale=2 ; $(cat /sys/class/thermal/thermal_zone0/temp) / 1000" | bc -l)
     CORE_A72_TEMP=$(echo "scale=2 ; $(cat /sys/class/thermal/thermal_zone1/temp) / 1000" | bc -l)
-
+    
     case $1 in
         _A53_0) CPU_USAGE_A53_0=$(printf %.3f $(echo "100-((($ID2_0-$ID1_0) * 100) / ($US2_0-$US1_0+$NI2_0-$NI1_0+$SY2_0-$SY1_0+$ID2_0-$ID1_0+$IO2_0-$IO1_0+$IR2_0-$IR1_0+$SO2_0-$SO1_0+$ST2_0-$ST1_0+$GU2_0-$GU1_0+$GN2_0-$GN1_0))" | bc -l ));;
         _A53_1) CPU_USAGE_A53_1=$(printf %.3f $(echo "100-((($ID2_1-$ID1_1) * 100) / ($US2_1-$US1_1+$NI2_1-$NI1_1+$SY2_1-$SY1_1+$ID2_1-$ID1_1+$IO2_1-$IO1_1+$IR2_1-$IR1_1+$SO2_1-$SO1_1+$ST2_1-$ST1_1+$GU2_1-$GU1_1+$GN2_1-$GN1_1))" | bc -l ));;
@@ -43,6 +48,7 @@ function get_cpu () {
     esac
 } # done
 
+# get gpu usage stats
 function get_gpu () {
     printf "Gpu info\n"
     # calculate GPU temperatures
@@ -58,6 +64,7 @@ function get_gpu () {
     GPU_USAGE=$(printf %.3f $GPU_PERCENT_TMP)
 } # done
 
+# get ram usage stats
 function get_ram () {
     printf "Ram info\n"
     # calculate RAM metrics
@@ -71,6 +78,7 @@ function get_ram () {
     RAM_USAGE=$(printf %.3f $TMP)
 } # done
 
+# internet connectivity
 function get_connectivity () {
     printf "Internet info\n"
     # check internet connectivity
@@ -87,6 +95,7 @@ function get_connectivity () {
     NETWORK_SIGNAL=${NETWORK_SIGNAL::-1}
 } # done
 
+# internet data usage stats
 function get_data () {
     printf "Data info\n"
     # get usage for ethernet
@@ -99,6 +108,7 @@ function get_data () {
     DATA_WWAN0_TX=$(printf %.3f $(echo "$(vnstat -i wwan0 --xml m | awk -F'[<>]' '/<total>/ {print $9}') / (1024*1024)" | bc -l))
 } # done
 
+# power stats
 function get_power () {
     printf "Power info\n"
     if [ -f "${BATTFILE}" ]; then
@@ -129,6 +139,7 @@ function get_power () {
     fi
 } # done
 
+# weather stats
 function get_weather () {
     printf "Weather info\n"
 
@@ -150,6 +161,7 @@ function get_weather () {
 
 } # done
 
+# main loop
 while true; do
 
     # taking reading at one instant for cpu usage
@@ -177,7 +189,7 @@ while true; do
 
     sleep 59
 
-    # taking reading again after 10 secs
+    # taking reading again after 60 secs
     #overall
     read -r VAL US2 NI2 SY2 ID2 IO2 IR2 SO2 ST2 GU2 GN2 <<< $(head -1 /proc/stat)
     #cpu0
