@@ -7,6 +7,7 @@
     <title>Digital Entomologist</title>
     <link rel="stylesheet" href="{{url_for('static',filename='icons/css/line-awesome.min.css')}}">
     <link rel="stylesheet" href="{{url_for('static',filename='css/dashboard.css')}}">
+    <script src="{{url_for('static',filename='js/configuration.js')}}"></script>
 </head>
 <body>
     <input type="checkbox" id="nav-toggle">
@@ -81,7 +82,50 @@
                     </div>
                 </div>
             </div>
-
+            <style>
+                .rana-config-container{
+                    display: flex;
+                    justify-content: space-between;
+                }
+                .rana-config{
+                    margin-top: 5px;
+                    background: #fff;
+                    padding: 2rem;
+                    border-radius: 2px;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .rana-config div{
+                    margin: 3px 0;
+                    padding: 5px 10px;
+                    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+                }
+                .rana-config label{
+                    display: block;
+                }
+                .rana-config input{
+                    width: 100%;
+                    border: none;
+                    border-bottom: 1px solid gray;
+                }
+                .rana-config-input-container{
+                    width: 60%;
+                }
+            </style>
+            <div class="rana-config-container">
+                <div class="rana-config rana-config-input-container">
+                    <form action="/saveRanaConfig" method="post">
+                        <button type="submit" style="color: #fff;padding:5px 10px;margin-left: 90%; background-color: rgb(19, 197, 19);">Save</button>
+                        {%for line in data%}
+                        <div>
+                            <label for="{{line[0]}}">{{line[0]}}</label>
+                            <input type="text" name="{{line[0]}}" value="{{line[1]}}" placeholder="{{line[1]}}">
+                            <input type="hidden" name="">
+                        </div>
+                        {%endfor%}
+                    </form>
+                </div>
+            </div>
         </main>
 
 

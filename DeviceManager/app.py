@@ -1,4 +1,4 @@
-from crypt import methods
+from itertools import count
 import json
 from multiprocessing import dummy
 from flask import Flask, render_template, Response, redirect, request, session, url_for, abort, send_file
@@ -12,6 +12,7 @@ app.config['SECRET_KEY']="asdadvadfsdfs"      #random secret key
 app.config['ENV']='development'
 app.config['UPLOAD_FOLDER']='/media/mmcblk1p1'
 app.config['RANA_FOLDER']='/usr/sbin/rana'
+app.config['RANA_CONFIG_PATH'] = '../../PracticeScript/ranacoreTest.conf'
 
 def readFile(fileName):
     path="/tmp/"+fileName
@@ -26,6 +27,19 @@ def readFile(fileName):
     except Exception as e:
         data={"error":str(e)}
     return data
+
+def readRanaConfigData():
+    temp=[]
+    with open(app.config['RANA_CONFIG_PATH'],'r') as file:
+        data=file.readlines()
+        for line in data:
+            if line[0]!='#' and line[0]!='\n':
+                ind=line.index(" ")
+                key=line[:ind]
+                value=line[ind+1:]
+                temp.append([key,value])
+    return temp
+        
 
 def readData():
     data={}
@@ -168,7 +182,31 @@ def download(filename):
 
 @app.route('/configurations')
 def configurations():
-    return render_template('configurations.html')
+    data=readRanaConfigData()
+    return render_template('configurations.html',data=data)
+
+@app.route('/saveRanaConfig',methods=['POST'])
+def saveRanaConfig():
+    if 'username' in session and request.method == 'POST':
+        formData=request.form
+        contentDict={}
+        content=None
+        with open(app.config['RANA_CONFIG_PATH'],'r') as file:
+            content=file.readlines()
+        count=0
+        for line in content:
+            if line[0]!='#' and line[0]!='\n':
+                ind=line.index(" ")
+                key=line[:ind]
+                value=formData[key]
+                contentDict[key]=(value,count)
+            count+=1
+        for key in contentDict:
+            line=key+" "+contentDict[key][0]+'\n'
+            content[contentDict[key][1]]=line
+        with open(app.config['RANA_CONFIG_PATH'],'w') as file:
+            file.writelines(content)
+    return redirect(url_for('configurations'))
 
 @app.route('/configurations/file', methods=['GET', 'POST'])
 def downloadConfFile():
