@@ -1,7 +1,8 @@
 from itertools import count
 import json
 from multiprocessing import dummy
-from flask import Flask, render_template, Response, redirect, request, session, url_for, abort, send_file
+from urllib import response
+from flask import Flask, render_template, Response, redirect, request, session, url_for, abort, send_file, jsonify
 import cv2
 import time
 import os
@@ -13,6 +14,7 @@ app.config['ENV']='development'
 app.config['UPLOAD_FOLDER']='/media/mmcblk1p1'
 app.config['RANA_FOLDER']='/usr/sbin/rana'
 app.config['RANA_CONFIG_PATH'] = '../../PracticeScript/ranacoreTest.conf'
+app.config['credentials'] = 'credentials.json'
 
 def readFile(fileName):
     path="/tmp/"+fileName
@@ -101,7 +103,7 @@ def login():
         email=request.form.get('email')
         password=request.form.get('pass')
         credentials=None
-        with open('/usr/sbin/device-manager/DeviceManager/credentials.json') as file:
+        with open(app.config['credentials']) as file:
             credentials=json.load(file)
         if credentials['email']==email and credentials['password']==password:
             session['username']=credentials['username']
@@ -110,8 +112,8 @@ def login():
 
 def gen_frames():  # generate frame by frame from camera
     
-    subprocess.call(["systemctl","stop","rana"])
-    camera = cv2.VideoCapture(2)  # use 0 for web camera
+    # subprocess.call(["systemctl","stop","rana"])
+    camera = cv2.VideoCapture(0)  # use 0 for web camera
     camera.set(cv2.CAP_PROP_FPS,120)
     #  for cctv camera use rtsp://username:password@ip_address:554/user=username_password='password'_channel=channel_number_stream=0.sdp' instead of camera
     # for local webcam use cv2.VideoCapture(0)
@@ -139,7 +141,39 @@ def videoFeed():
 @app.route('/video')
 def video(): 
     if 'username' in session:
-        return render_template('videoFeed.html')
+        data={}
+        try:
+            var = subprocess.check_output("v4l2-ctl --device /dev/video0 --list-ctrls".split())
+            output = var.decode('utf-8')
+            output = output.split('\n')
+            for index in range(len(output)-1):
+                output[index] = output[index].strip()
+                temp = output[index].split()
+                if '(int)' in temp:
+                    data[temp[0]]=[]
+                    data[temp[0]].append(temp[4].split('=')[-1])
+                    data[temp[0]].append(temp[5].split('=')[-1])
+                    data[temp[0]].append(temp[6].split('=')[-1])
+                    data[temp[0]].append(temp[7].split('=')[-1])
+                    data[temp[0]].append(temp[8].split('=')[-1])
+        except:
+            data["error"]="Something is wrong on v4l2"
+        return render_template('videoFeed.html',data=data)
+    return redirect(url_for('login'))
+
+@app.route('/setCamControls')
+def setCamControls():
+    if 'username' in session:
+        args = request.args
+        key = args.get('key')
+        value = args.get('value')
+        try:
+            subprocess.call(f"v4l2-ctl --device /dev/video0 --set-ctrl={key}={value}".split())
+            resp = {'msg':'success'}
+            return  jsonify(resp)
+        except:
+            resp = {'msg':'error'}
+            return  jsonify(resp)
     return redirect(url_for('login'))
 
 @app.route('/dashboard')

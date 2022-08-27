@@ -60,16 +60,116 @@
         <main>
             <div style="width:100%; padding:0 0 10px 0;text-align:center;">
                 Please restart the device after closing the device manager.
+                <span style="float: left; font-size:18px;padding-right:3px">cam controls:</span>
+                <i style="float:left;font-size:28px;" onclick="camControlsToggler()" class="las la-cog"></i>
             </div>
             <div class="video-feed-container">
                 <div class="cam">
                     <img src="{{url_for('videoFeed')}}" width="100%" height="100%" alt="">
                 </div>
             </div>
+            <div class="cam-controls" id="cam-controls-container" style="display: none;">
+                <div class="cam-controls-closing-btn" onclick="camControlsToggler()">X</div>
+                {%if 'error' in data%}
+                <div style="width:100%; padding:10px 0 5px 0;text-align:center;font-size:larger">
+                    {{data.error}}
+                </div>
+                {%else%}
+                <div style="width:100%; padding:10px 0 5px 0;text-align:center;font-size:larger">
+                    Camera Controls
+                </div>
+                <div class="cam-controls-btn-container">
+                    <div class="cam-controls-btn">
+                        <label for="cam-controls-select-box">Camera key:</label>
+                        <select name="cam-controls-select-box" id="cam-controls-select-box" value="" onchange="camControlsSelectHandler(this)">
+                            {%for key in data%}
+                                <option value="{{key}}" data-min="{{data[key][0]}}" data-max="{{data[key][1]}}" data-step="{{data[key][2]}}" data-default="{{data[key][3]}}" data-value="{{data[key][4]}}">{{key}}</option>
+                            {%endfor%}
+                        </select>
+                        <input type="number" name="" id="cam-control-input" min="" max="" placeholder="">
+                        <button onclick="setCamContolBtnHandler(this)" style="letter-spacing:2px;">SET</button>
+                    </div>
+                    <div id="cam-controls-additional-info-displayer" style="width:100%; padding:10px 0 5px 0;text-align:center;font-size:smaller">
 
+                    </div>
+                    <div id="cam-controls-msg-displayer" style="width:100%;text-align:center;color:red;">
+
+                    </div>
+                </div>
+                {%endif%}
+            </div>
         </main>
 
 
     </div>
+    <script>
+        function camControlsSelectHandler(evnt){
+            let options = evnt.options;
+            let currentOption = options[evnt.selectedIndex];
+            let optionValues = {
+                min : currentOption.dataset.min,
+                max : currentOption.dataset.max,
+                step : currentOption.dataset.step,
+                default : currentOption.dataset.default,
+                value : currentOption.dataset.value, 
+            };
+            let input = document.getElementById("cam-control-input");
+            input.placeholder = optionValues.value;
+            input.min = optionValues.min;
+            input.max = optionValues.max;
+            input.dataset.key = currentOption.value;
+            input.value = ""
+
+            let msgDisplayer = document.getElementById("cam-controls-additional-info-displayer");
+            msgDisplayer.innerText = `*The current value is ${optionValues.value}, min value  ${optionValues.min}, max ${optionValues.max}, default ${optionValues.default}`
+            
+        }
+        function setCamContolBtnHandler(btn){
+            let input = document.getElementById("cam-control-input");
+            let msgDisplayer = document.getElementById("cam-controls-msg-displayer")
+            let key = input.dataset.key;
+            let value = input.value;
+            let minValue = Number(input.min)
+            let maxValue = Number(input.max)
+            if(value==""){
+                msgDisplayer.innerText = "**The value can't be empty**";
+                msgDisplayer.style.color='red';
+                return;
+            }
+            value = Number(value)
+            if(value<minValue || value>maxValue){
+                msgDisplayer.innerText = "**The entered value is not in correct range**";
+                msgDisplayer.style.color='red';
+                return
+            }
+            msgDisplayer.innerText = "**Setting the value, please wait**";
+            msgDisplayer.style.color='green';
+
+            btn.disabled=true;
+
+            fetch(`${window.location.origin}/setCamControls?key=${key}&value=${value}`)
+            .then((response) => response.json())
+            .then((data) => {
+                btn.disabled=false;
+                if(data.msg=="success"){
+                    msgDisplayer.innerText = "**The value changed successfully**";
+                    msgDisplayer.style.color='green';
+                }else{
+                    msgDisplayer.style.color='red'
+                    msgDisplayer.innerText = "**Something went Wrong Please try again after reloading the page**";
+                }
+            });
+            
+        }
+        function camControlsToggler(){
+            let elmnt = document.getElementById('cam-controls-container')
+            if(elmnt.style.display=='none'){
+                elmnt.style.display='block'
+            }else{
+                elmnt.style.display='none'
+            }
+        }
+        camControlsSelectHandler(document.getElementById("cam-controls-select-box"));
+    </script>
 </body>
 </html> 
