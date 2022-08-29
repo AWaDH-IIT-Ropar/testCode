@@ -2,7 +2,7 @@
 #weather_02-06-2022_14_D0598.csv
 
 # OUTFILE="/media/mmcblk1p1/devicestats.csv"
-OUTDIR="/media/mmcblk1p1/upload"
+OUTDIR="/tmp"
 BATTFILE="/tmp/battery_parameters"
 LUXFILE="/tmp/light_intensity"
 WEATHERFILE="/tmp/met"
@@ -213,10 +213,6 @@ while true; do
     get_cpu "_A72_0"
     get_cpu "_A72_1"
 
-    OUTFILE="${OUTDIR}/devicestats_$(date +%d-%m-%Y_%H)_${SERIAL_ID:1:-1}.csv"
-    if [ -f ${OUTFILE} ]; then
-        echo "$(date +%Y-%m-%d,%H:%M:%S),$BATT_TEMP,$BATT_VOLTAGE,$BATT_CURRENT,$CPU_USAGE,$CORE_A53_TEMP,$CPU_USAGE_A53_0,$CPU_USAGE_A53_1,$CPU_USAGE_A53_2,$CPU_USAGE_A53_3,$CORE_A72_TEMP,$CPU_USAGE_A72_0,$CPU_USAGE_A72_1,$GPU_0_TEMP,$GPU_1_TEMP,$GPU_USAGE,$RAM_USAGE,$DATA_ETH0_RX,$DATA_ETH0_TX,$DATA_WWAN0_RX,$DATA_WWAN0_TX" >> ${OUTFILE}
-    else
-        echo "Date,Time,Batt-temp,Voltage,Current,CPU-usage,A53-temp,A53-0-usage,A53-1-usage,A53-2-usage,A53-3-usage,A72-temp,A72-0-usage,A72-1-usage,GPU0-temp,GPU1-temp,GPU-usage,RAM-usage,Ethernet-RX,Ethernet-TX,WWAN-RX,WWAN-TX" >> ${OUTFILE}
-    fi
+    OUTFILE="${OUTDIR}/devicestats.csv"
+    echo "$(date +%Y-%m-%d,%H:%M:%S),$BATT_TEMP,$BATT_VOLTAGE,$BATT_CURRENT,$CPU_USAGE,$CORE_A53_TEMP,$CPU_USAGE_A53_0,$CPU_USAGE_A53_1,$CPU_USAGE_A53_2,$CPU_USAGE_A53_3,$CORE_A72_TEMP,$CPU_USAGE_A72_0,$CPU_USAGE_A72_1,$GPU_0_TEMP,$GPU_1_TEMP,$GPU_USAGE,$RAM_USAGE,$DATA_ETH0_RX,$DATA_ETH0_TX,$DATA_WWAN0_RX,$DATA_WWAN0_TX" > ${OUTFILE}
 done
