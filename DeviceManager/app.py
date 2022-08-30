@@ -111,9 +111,9 @@ def login():
     return render_template('login.html')
 
 def gen_frames():  # generate frame by frame from camera
-    
-    # subprocess.call(["systemctl","stop","rana"])
-    camera = cv2.VideoCapture(0)  # use 0 for web camera
+
+    subprocess.call(["systemctl","stop","rana"])
+    camera = cv2.VideoCapture(2)  # use 0 for web camera
     camera.set(cv2.CAP_PROP_FPS,120)
     #  for cctv camera use rtsp://username:password@ip_address:554/user=username_password='password'_channel=channel_number_stream=0.sdp' instead of camera
     # for local webcam use cv2.VideoCapture(0)
