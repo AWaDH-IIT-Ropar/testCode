@@ -143,7 +143,7 @@ def video():
     if 'username' in session:
         data={}
         try:
-            var = subprocess.check_output("v4l2-ctl --device /dev/video0 --list-ctrls".split())
+            var = subprocess.check_output("v4l2-ctl --device /dev/video2 --list-ctrls".split())
             output = var.decode('utf-8')
             output = output.split('\n')
             for index in range(len(output)-1):
@@ -168,7 +168,7 @@ def setCamControls():
         key = args.get('key')
         value = args.get('value')
         try:
-            subprocess.call(f"v4l2-ctl --device /dev/video0 --set-ctrl={key}={value}".split())
+            subprocess.call(f"v4l2-ctl --device /dev/video2 --set-ctrl={key}={value}".split())
             resp = {'msg':'success'}
             return  jsonify(resp)
         except:
