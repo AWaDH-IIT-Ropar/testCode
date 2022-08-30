@@ -13,8 +13,8 @@ app.config['SECRET_KEY']="asdadvadfsdfs"      #random secret key
 app.config['ENV']='development'
 app.config['UPLOAD_FOLDER']='/media/mmcblk1p1'
 app.config['RANA_FOLDER']='/usr/sbin/rana'
-app.config['RANA_CONFIG_PATH'] = '../../PracticeScript/ranacoreTest.conf'
-app.config['credentials'] = 'credentials.json'
+app.config['RANA_CONFIG_PATH'] = '/usr/sbin/rana/ranacore.conf'
+app.config['credentials'] = '/usr/sbin/device-manager/DeviceManager/credentials.json'
 
 def readFile(fileName):
     path="/tmp/"+fileName
