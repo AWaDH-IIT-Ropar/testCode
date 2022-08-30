@@ -238,6 +238,7 @@ function battery_guage_detect () {
 }
 
 function battery_guage_verify () {
+    # write to the guage to read the ID of the guage
     i2cset -y 4 0x55 0x00 0x0001 w
     local CHECK=$(i2cget -y 4 0x55 0x00 w | awk '{print $0}')
 
