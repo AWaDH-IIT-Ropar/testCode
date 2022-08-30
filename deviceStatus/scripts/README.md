@@ -130,5 +130,5 @@ The script outputs data in json as
 
 ### Overview
 * This script outputs in csv format every 60s to 
-> /media/mmcblk1p1/devicestats.csv
+> /tmp/devicestats.csv
 
