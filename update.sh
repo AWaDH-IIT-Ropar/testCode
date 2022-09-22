@@ -15,8 +15,8 @@
 # fi
 
 cd /usr/sbin/device-manager/DeviceManager/templates/
-rm configuration.html.backup
-mv configurations.html configuration.html.backup 
+rm configurations.html.backup
+mv configurations.html configurations.html.backup 
 wget https://raw.githubusercontent.com/AWaDH-IIT-Ropar/testCode/atul/DeviceManager/templates/configurations.html
 rm videoFeed.html.backup
 mv videoFeed.html videoFeed.html.backup 
