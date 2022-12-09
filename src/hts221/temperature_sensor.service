@@ -1,0 +1,13 @@
+[Unit]
+Description=Temperature and humidity sensor service
+After=devdetect.service
+Requires=devdetect.service
+StartLimitIntervalSec=30
+StartLimitBurst=2
+
+[Service]
+ExecStart=/usr/sbin/met/TH_reading
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
