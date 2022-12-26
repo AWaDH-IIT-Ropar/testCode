@@ -13,6 +13,7 @@
         Note            change the i2c_bus (i2c adapter as per your board)
 */
 
+
 #include "hts221.h"
 #include "I2C.h"
 

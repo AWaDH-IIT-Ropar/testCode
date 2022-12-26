@@ -266,8 +266,7 @@ int data_write()
         return 0;
 }
 
-//function check if the output csv file already exist for present hour, if not it will create new file with present date and hour else append data to current file
-// funtion does not create new file every hour. New file created only if code restart and file don't exist
+                //check if file exists
 int checkIfFileExists(const char * filename)
 {
         FILE *file;
@@ -286,7 +285,8 @@ int checkIfFileExists(const char * filename)
 int main()
 {
         filename_func();
-       
+       //function check if the output csv file already exist for present hour, if not it will create new file with present date and hour else append data to current file
+        // funtion does not create new file every hour. New file created only if code restart and file don't exist
         if(checkIfFileExists(csv_filename))
         {
                 // open file for read

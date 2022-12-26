@@ -7,7 +7,6 @@ const char * DATA_OUT_FORMAT = "{\n\t\"Light_intensity\":\"%.2f\"\n}\n";
 int configure()
 {
     //writing 0x0000 to the configuration register i.e 0x00 
-
     uint8_t reg_addr = CONF_REG;
     uint8_t reg_data[2];
     reg_data[0] = 0x00;
@@ -32,6 +31,7 @@ int read_light_intensity()
         printf("Fail to read light intensity\n");
         exit(1);
     }
+    //Combine higher byte and lower byte of register
     return ((uint16_t)(*(p_ret_val+1)) << 8 | *p_ret_val);
     
 }

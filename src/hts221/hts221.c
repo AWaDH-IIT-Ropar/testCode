@@ -116,8 +116,6 @@ int read_calibration_data()
         H2 = (uint16_t)(*(p_ret_data+1)) << 8 | *p_ret_data ;
 
 
-
-
         reg_addr = 0x3a | 0x80;// | 0x80 auto increment reg value
         n_bytes = 2;
         p_ret_data = i2c_read(SLAVE_ADDR, reg_addr,n_bytes);
@@ -260,7 +258,7 @@ int EnableHeater()
         }
 
         uint8_t reg_data[2];
-        reg_data[0] = *p_ret_val | 0x02;
+        reg_data[0] = *p_ret_val | 0x02; 
         int ret_val = i2c_write(SLAVE_ADDR, reg_addr,reg_data, n_bytes);
         if(ret_val < 0 )
         {

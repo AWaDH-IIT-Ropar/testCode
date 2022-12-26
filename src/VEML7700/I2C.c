@@ -40,6 +40,7 @@ int i2c_close(const char *i2c_bus)
 int i2c_write(unsigned char slave_addr, unsigned char reg, unsigned char *data, unsigned char NBytes)
 {
 
+    // struct defined in linux i2c-dev interface
     struct i2c_msg msgs[1];
     struct i2c_rdwr_ioctl_data msgset[1];
 
@@ -58,6 +59,7 @@ int i2c_write(unsigned char slave_addr, unsigned char reg, unsigned char *data, 
     msgset[0].msgs = msgs;
     msgset[0].nmsgs = 1;
 
+    // write data from buffer on i2c line 
     if (ioctl(fd_i2c, I2C_RDWR, &msgset) < 0) {
         perror("ioctl(I2C_RDWR) in i2c_write");
         return -1;

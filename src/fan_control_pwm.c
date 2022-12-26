@@ -6,8 +6,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+// config file path
 #define CONF_FILE_PATH "/etc/entomologist/fan_control.conf"
-int temp_h=75000,temp_l=70000;// fan control temperature upper and lower limit
+int temp_h=75000,temp_l=70000;// fan control temperature upper and lower limit - value/1000 - degree celsius
 
 
 // check if file already exist to avoid gpio export error
@@ -38,7 +39,7 @@ int export_gpio()
                         perror("Unable to open /sys/class/pwm/pwmchip3/export");
                         exit(1);
                 }
-
+                // To write byte to export pwm0 file
                 if (write(fd, "0", 1) != 1) {
                         perror("Error writing to /sys/class/pwm/pwmchip3/export");
                         close(fd);
