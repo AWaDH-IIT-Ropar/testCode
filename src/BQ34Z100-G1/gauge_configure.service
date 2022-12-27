@@ -1,0 +1,13 @@
+[Unit]
+Description=fuel gauge configure service
+After=devdetect.service
+Requires=devdetect.service
+#Before=battery_parameters.service
+
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/power/gauge_configure
+
+[Install]
+WantedBy=multi-user.target
